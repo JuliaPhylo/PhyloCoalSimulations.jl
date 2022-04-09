@@ -1,0 +1,3 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+PhyloCoalSimulations = "53f7b83a-06b5-4910-9a21-1896bf762ade"
