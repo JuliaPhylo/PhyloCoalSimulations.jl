@@ -1,5 +1,10 @@
 module PhyloCoalSimulations
 
-# Write your package code here.
+using PhyloNetworks
+
+export
+simulatecoal_onepopulation
+
+include("simulatecoalescent.jl")
 
 end
