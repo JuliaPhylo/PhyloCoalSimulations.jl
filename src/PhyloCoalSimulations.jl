@@ -1,5 +1,6 @@
 module PhyloCoalSimulations
 
+using Distributions
 using PhyloNetworks
 
 export
