@@ -1,8 +1,9 @@
 using PhyloCoalSimulations
+import PhyloCoalSimulations as PCS
 using Test
+using Random
+import PhyloNetworks as PN
 
 @testset "PhyloCoalSimulations.jl" begin
-    # tests could be broken across files
-    @test simulatecoal_onepopulation(1, 2.0) == 1
-    @test isnothing(simulatecoal_onepopulation(0, 2.0))
+    include("test_onepopulation.jl")
 end

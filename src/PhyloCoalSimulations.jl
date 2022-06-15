@@ -1,11 +1,12 @@
 module PhyloCoalSimulations
 
 using Distributions
-using PhyloNetworks
+import PhyloNetworks as PN # brings PN in scope, but none of its names
 
 export
-simulatecoal_onepopulation
+simulatecoalescent
 
-include("simulatecoalescent.jl")
+include("simulatecoalescent_onepop.jl")
+include("simulatecoalescent_network.jl")
 
 end
