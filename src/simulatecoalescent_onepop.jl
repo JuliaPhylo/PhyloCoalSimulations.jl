@@ -1,5 +1,5 @@
 """
-    simulatecoal_onepopulation(lineagelist, population_length, nextlineageID,
+    simulatecoal_onepopulation!(lineagelist, population_length, nextlineageID,
                                populationID=-1)
 
 Simulate the coalescent process within a single population of length given
@@ -19,7 +19,7 @@ in the species phylogeny.
 # examples
 
 ```jldoctest
-julia> PhyloCoalSimulations.simulatecoal_onepopulation([], 2.0, 1)
+julia> PhyloCoalSimulations.simulatecoal_onepopulation!([], 2.0, 1)
 Any[]
 
 julia> e1 = PhyloCoalSimulations.initializetip("s","1",1,"",0.1);
@@ -28,7 +28,7 @@ julia> e2 = PhyloCoalSimulations.initializetip("s","2",2,"",0.2);
 
 julia> using Random; Random.seed!(7690);
 
-julia> forest = PhyloCoalSimulations.simulatecoal_onepopulation([e1,e2], Inf, 3);
+julia> forest = PhyloCoalSimulations.simulatecoal_onepopulation!([e1,e2], Inf, 3);
 
 julia> PhyloCoalSimulations.convert2tree!(forest[1].node[1])
 PhyloNetworks.HybridNetwork, Rooted Network
@@ -39,7 +39,7 @@ tip labels: s1, s2
 
 ```
 """
-function simulatecoal_onepopulation(lineagelist::AbstractVector,
+function simulatecoal_onepopulation!(lineagelist::AbstractVector,
             poplen::AbstractFloat, nextid::Int, populationid = -1)
     isempty(lineagelist) && return(lineagelist)
     poplen > 0.0 || return(lineagelist)
