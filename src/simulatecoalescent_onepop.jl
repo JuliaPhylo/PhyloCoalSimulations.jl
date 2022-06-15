@@ -6,9 +6,11 @@ Simulate the coalescent process within a single population of length given
 in coalescent units, starting from lineages in `lineagelist`. This list should
 be a vector of incomplete edges, that is, edges incident to a single node only.
 
-Output: vector of incomplete edges, whose lengths have been increased.
+Vector of incomplete edges, whose lengths have been increased, is modified in place.
 New nodes and their parent edges are created by coalescent events, numbered
 with consecutive integers starting at `nextlineageID`.
+
+Output: nextid, incremented by number of new lineages.
 
 In lineages, edge lengths are also considered in coalescent units.
 
@@ -41,8 +43,8 @@ tip labels: s1, s2
 """
 function simulatecoal_onepopulation!(lineagelist::AbstractVector,
             poplen::AbstractFloat, nextid::Int, populationid = -1)
-    isempty(lineagelist) && return(lineagelist)
-    poplen > 0.0 || return(lineagelist)
+    isempty(lineagelist) && return(nextid)
+    poplen > 0.0 || return(nextid)
     # at this point: the list has 1 or more lineages
     nlineage = length(lineagelist)
     poplen < Inf || nlineage > 1 ||
@@ -51,7 +53,7 @@ function simulatecoal_onepopulation!(lineagelist::AbstractVector,
     while true
         if nlineage == 1 # then no one can coalesce
             lineagelist[1].length += timeleft
-            return lineagelist # breaks the while loop
+            return nextid # breaks the while loop
         end
         # at this point: 2 or more lineages
         coaltime = rand(Exponential(1/binomial(nlineage,2)))
@@ -61,7 +63,7 @@ function simulatecoal_onepopulation!(lineagelist::AbstractVector,
         end
         timeleft -= coaltime
         if timeleft <= 0 # break the loop: coalescence goes too far
-            return lineagelist
+            return nextid
         end
         # pick at random 2 lineages to merge, into a new node numbered nextid
         drop_index = sample(1:nlineage)
@@ -211,9 +213,9 @@ function convert2tree!(rootnode::PN.Node)
     net.numNodes = length(net.node)
     net.numEdges = length(net.edge)
     length(Set(n.number for n in net.node)) == net.numNodes ||
-        error("node numbers are not all distinct")
+        @error("node numbers are not all distinct")
     length(Set(e.number for e in net.edge)) == net.numEdges ||
-        error("edge numbers are not all distinct")
+        @error("edge numbers are not all distinct")
     ntaxa = 0
     for nn in net.node # collect leaf names and # of leaves
         nn.leaf == (length(nn.edge)==1) ||

@@ -1,5 +1,5 @@
 function simulatecoalescent(net::PN.HybridNetwork, nloci, nindividuals=1)
-    if ias(nindividuals, AbstractDict)
+    if isa(nindividuals, AbstractDict)
         # check if value types are Integers? || error("nindividuals should be integers")
         length(nindividuals) == net.numTaxa || error("nindividuals has wrong length")
     elseif isa(nindividuals, Integer)
@@ -9,6 +9,7 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci, nindividuals=1)
     end
     PN.preorder!(net)
     node2forest = Dict(n.number => PN.Edge[] for n in net.node)
+    edge2forest = Dict(e.number => PN.Edge[] for e in net.edge)
 
     genetreelist = Vector{PN.HybridNetwork}(undef,nloci)
     nnodes = length(net.node)
@@ -16,12 +17,15 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci, nindividuals=1)
         for f in values(node2forest) # clean up intermediate dictionary
             empty!(f)
         end
+        for f in values(edge2forest)
+            empty!(f)
+        end
         for nodei in nnodes:-1:1
             nn = net.nodes_changed[nodei]
             parentedgelist = PN.Edge[]
             for e in nn.edge
                 PN.getChild(e) === nn || continue
-                push!(e, parentedgelist)
+                push!(parentedgelist, e)
             end
             nparents = length(parentedgelist)
             nextid = 1
@@ -33,19 +37,37 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci, nindividuals=1)
                     e.inCycle = ee.number
                 end
                 nextid += nindividuals[nn.name]
-                node2forest[nn.number] = f
-                simulatecoal_onepopulation!(f, ee.length, nextid, ee.number)
-            elseif nparents == 1 # tree node but not leaf
-                # get the index of children nodes
-                # gather forests for all children populations
-                # run coalescent along parent edge
+                edge2forest[ee.number] = f
+                nextid = simulatecoal_onepopulation!(f, ee.length, nextid, ee.number)
+                continue 
+            end
+
+            # gather forest from children
+            childedgelist = PN.Edge[]
+            for e in nn.edge
+                PN.getChild(e) !== nn || continue
+                push!(childedgelist, e)
+            end
+
+            #children = PN.getChildren(nn)
+            #forest = deepcopy(node2forest[children[1].number])
+            node2forest[nn.number] = edge2forest[childedgelist[1].number]
+            for i in 2:length(childedgelist)
+                append!(node2forest[nn.number], edge2forest[childedgelist[i].number])
+            end
+            
+            f = node2forest[nn.number]
+
+            if nparents == 1 # tree node but not leaf
+                ee = parentedgelist[1]
+                edge2forest[ee.number] = f
+                nextid = simulatecoal_onepopulation!(f, ee.length, nextid, ee.number)
             elseif nparents > 1
-                # gather forest from children populations
                 # partition random across all parent edges
                 # run coalescent along each parent edge
             else # nparents = 0: infinite root population
-                # run coalescent along infinite population
-                # extract rootnode: node[1] of single edge in the forest
+                nextid = simulatecoal_onepopulation!(f, Inf, nextid)
+                rootnode = f[1].node[1]
                 genetreelist[ilocus] = convert2tree!(rootnode)
                 # may be write tree to output file?
             end
