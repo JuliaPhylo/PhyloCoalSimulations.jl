@@ -2,6 +2,7 @@ using PhyloCoalSimulations
 import PhyloCoalSimulations as PCS
 using Test
 using Random
+using PhyloNetworks
 import PhyloNetworks as PN
 
 @testset "PhyloCoalSimulations.jl" begin

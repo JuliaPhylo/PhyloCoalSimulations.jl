@@ -1,7 +1,8 @@
 module PhyloCoalSimulations
 
 using Distributions
-import PhyloNetworks as PN # brings PN in scope, but none of its names
+import PhyloNetworks     # brings PhyloNetworks in scope, but none of its names
+const PN = PhyloNetworks # import PhyloNetworks as PN requires julia v1.6
 
 export
 simulatecoalescent

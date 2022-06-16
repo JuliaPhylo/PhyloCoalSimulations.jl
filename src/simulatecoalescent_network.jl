@@ -20,6 +20,7 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci, nindividuals=1)
         for f in values(edge2forest)
             empty!(f)
         end
+        nextid = 1
         for nodei in nnodes:-1:1
             nn = net.nodes_changed[nodei]
             parentedgelist = PN.Edge[]
@@ -28,7 +29,6 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci, nindividuals=1)
                 push!(parentedgelist, e)
             end
             nparents = length(parentedgelist)
-            nextid = 1
             # keep track of next available node & edge ID!
             if nn.leaf
                 ee = parentedgelist[1]

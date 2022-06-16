@@ -67,7 +67,7 @@ function simulatecoal_onepopulation!(lineagelist::AbstractVector,
         end
         # pick at random 2 lineages to merge, into a new node numbered nextid
         drop_index = sample(1:nlineage)
-        edge1 = popat!(lineagelist, drop_index)
+        edge1 = popat!(lineagelist, drop_index) # popat! requires julia v1.5
         drop_index = sample(1:(nlineage-1))
         edge2 = lineagelist[drop_index]
         parentedge = coalescence_edge(edge1,edge2,nextid,populationid)
