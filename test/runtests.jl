@@ -7,4 +7,5 @@ import PhyloNetworks as PN
 
 @testset "PhyloCoalSimulations.jl" begin
     include("test_onepopulation.jl")
+    include("test_multispeciesnetwork.jl")
 end
