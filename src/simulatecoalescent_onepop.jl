@@ -22,15 +22,27 @@ in the species phylogeny.
 
 ```jldoctest
 julia> PhyloCoalSimulations.simulatecoal_onepopulation!([], 2.0, 1)
-Any[]
+1
 
 julia> e1 = PhyloCoalSimulations.initializetip("s","1",1,"",0.1);
 
 julia> e2 = PhyloCoalSimulations.initializetip("s","2",2,"",0.2);
 
+julia> forest = [e1,e2]
+2-element Vector{PhyloNetworks.Edge}:
+ PhyloNetworks.Edge:
+ number:1
+ length:0.1
+ attached to 1 node(s) (parent first): 1
+
+ PhyloNetworks.Edge:
+ number:2
+ length:0.2
+ attached to 1 node(s) (parent first): 2
+
 julia> using Random; Random.seed!(7690);
 
-julia> forest = PhyloCoalSimulations.simulatecoal_onepopulation!([e1,e2], Inf, 3);
+julia> PhyloCoalSimulations.simulatecoal_onepopulation!(forest, Inf, 3);
 
 julia> PhyloCoalSimulations.convert2tree!(forest[1].node[1])
 PhyloNetworks.HybridNetwork, Rooted Network
