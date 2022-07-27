@@ -48,8 +48,8 @@ julia> PhyloCoalSimulations.convert2tree!(forest[1].node[1])
 PhyloNetworks.HybridNetwork, Rooted Network
 2 edges
 3 nodes: 2 tips, 0 hybrid nodes, 1 internal tree nodes.
-tip labels: s1, s2
-(s2:0.573,s1:0.473);
+tip labels: s2, s1
+(s2:0.502,s1:0.402);
 
 ```
 """
