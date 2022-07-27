@@ -18,8 +18,36 @@ genetree = PCS.simulatecoalescent(net, 2, 1)
 
 # simple checks:
 # degree-2 nodes have a name, degree-3 nodes don't have a name but have inCycle
-# names should be species node names or string from species node number
+# (john to cecile: can you remind me why we wanted it this way, and what the name/inCycle describe?)
 # inCycle values should be a number from a species edge
+Random.seed!(1624)
+genetree = PCS.simulatecoalescent(net, 1, 1)[1]
+for inode in 1:length(genetree.node)
+    print(inode)
+    node = genetree.node[inode]
+    isroot = node == genetree.node[genetree.root]
+    degree = length(node.edge)
+
+    # inCycle values should be a number from a species edge
+    speciesEdgeNumbers = Int64[]
+    for speciesEdge in net.edge
+        push!(speciesEdgeNumbers, speciesEdge.number)
+    end
+    @test node.inCycle == -1 || node.inCycle in speciesEdgeNumbers
+
+    if degree == 1
+        @test node.leaf && node.name != ""
+    elseif degree == 2
+        @test isroot || node.name != "" # degree-2 nodes have a name
+    elseif degree == 3
+        @test node.name == "" && node.inCycle != -1 # degree-3 nodes don't have a name but have inCycle
+    else
+        @test false # nodes should be degree 1, 2, or 3
+    end 
+end
+# names should be species node names or string from species node number
+# (john: ok, but i don't remember why this was useful.)
+
 # to do: simulate with 1000 gene trees, then check a few things, e.g.:
 # calculate qCFs, then check that they aren't too far from expectations
 # get distances between t2-t7, or t2-t5, or t5-t7: those should be minimum value + exponential.
