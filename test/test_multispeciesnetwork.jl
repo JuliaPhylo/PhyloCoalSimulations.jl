@@ -48,8 +48,37 @@ end
 # names should be species node names or string from species node number
 # (john: ok, but i don't remember why this was useful.)
 
-# to do: simulate with 1000 gene trees, then check a few things, e.g.:
+# to do: simulate with 1000 gene trees,
+nsim = 1000
+Random.seed!(1602)
+genetrees = PCS.simulatecoalescent(net, nsim, 1)
+# then check a few things, e.g.:
 # calculate qCFs, then check that they aren't too far from expectations
+alpha = 0.05
+expCF = [0.1104, 0.7792, 0.1104] # proof given in .jpeg in test folder
+obsCF, t = PN.countquartetsintrees(genetrees)
+obsCF = Int.(obsCF[1].data[1:3]*nsim) # change format to what HypothesisTests expects
+qCFtest = HypothesisTests.ChisqTest(obsCF, expCF)
+@test pvalue(qCFtest) >= alpha
 # get distances between t2-t7, or t2-t5, or t5-t7: those should be minimum value + exponential.
+dist_t2t7_min = 0.118
+dist_t2t5_min = 0.118 + 1.095 + 0.014
+dist_t5t7_min = 0.118 + 1.095 + 0.014
+dist_t2t7 = Float64[]
+dist_t2t5 = Float64[]
+dist_t5t7 = Float64[]
+for tree in genetrees
+    distances = PN.pairwiseTaxonDistanceMatrix(tree)
+    tips = PN.tipLabels(tree)
+    index_2 = findall(tips .== "t2")
+    index_5 = findall(tips .== "t5")
+    index_7 = findall(tips .== "t7")
+    push!(dist_t2t7, distances[index_2, index_7]) #todo: make this stop erroring
+    push!(dist_t2t5, distances[index_2, index_5])
+    push!(dist_t5t7, distances[index_5, index_7])
+end
+#t2t8min = Inf # would need to do calculation
+
+
 
 end
