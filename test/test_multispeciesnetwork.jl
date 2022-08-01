@@ -49,6 +49,7 @@ end
 # (john: ok, but i don't remember why this was useful.)
 
 # to do: simulate with 1000 gene trees,
+net = net # network with hybrid ladder, like above
 nsim = 1000
 Random.seed!(1602)
 genetrees = PCS.simulatecoalescent(net, nsim, 1)
@@ -61,24 +62,30 @@ obsCF = Int.(obsCF[1].data[1:3]*nsim) # change format to what HypothesisTests ex
 qCFtest = HypothesisTests.ChisqTest(obsCF, expCF)
 @test pvalue(qCFtest) >= alpha
 # get distances between t2-t7, or t2-t5, or t5-t7: those should be minimum value + exponential.
-dist_t2t7_min = 0.118
-dist_t2t5_min = 0.118 + 1.095 + 0.014
-dist_t5t7_min = 0.118 + 1.095 + 0.014
+# (note for later: there is repetition below that could probably be vectorized, or nested inside for-loops)
+dist_t2t7_min = 2*(0.118)
+dist_t2t5_min = 2*(0.118 + 1.095 + 0.014)
+dist_t5t7_min = 2*(0.118 + 1.095 + 0.014)
+#dist_t2t8_min = Inf # would need to do calculation
 dist_t2t7 = Float64[]
 dist_t2t5 = Float64[]
 dist_t5t7 = Float64[]
 for tree in genetrees
     distances = PN.pairwiseTaxonDistanceMatrix(tree)
     tips = PN.tipLabels(tree)
-    index_2 = findall(tips .== "t2")
-    index_5 = findall(tips .== "t5")
-    index_7 = findall(tips .== "t7")
-    push!(dist_t2t7, distances[index_2, index_7]) #todo: make this stop erroring
-    push!(dist_t2t5, distances[index_2, index_5])
-    push!(dist_t5t7, distances[index_5, index_7])
+    index_t2 = findall(tips .== "t2")
+    index_t5 = findall(tips .== "t5")
+    index_t7 = findall(tips .== "t7")
+    push!(dist_t2t7, distances[index_t2, index_t7][1])
+    push!(dist_t2t5, distances[index_t2, index_t5][1])
+    push!(dist_t5t7, distances[index_t5, index_t7][1])
 end
-#t2t8min = Inf # would need to do calculation
-
+test_t2t7 = HypothesisTests.OneSampleADTest(dist_t2t7 - repeat([dist_t2t7_min],nsim), Distributions.Exponential(2))
+test_t2t5 = HypothesisTests.OneSampleADTest(dist_t2t5 - repeat([dist_t2t5_min],nsim), Distributions.Exponential(2))
+test_t5t7 = HypothesisTests.OneSampleADTest(dist_t5t7 - repeat([dist_t5t7_min],nsim), Distributions.Exponential(2))
+@test pvalue(test_t2t7) >= alpha
+@test pvalue(test_t2t5) >= alpha
+@test pvalue(test_t5t7) >= alpha
 
 
 end
