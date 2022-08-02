@@ -16,34 +16,32 @@ Random.seed!(432)
 genetree = PCS.simulatecoalescent(net, 2, 1)
 @test length(genetree) == 2
 
-# simple checks:
-# degree-2 nodes have a name, degree-3 nodes don't have a name but have inCycle
-# (john to cecile: can you remind me why we wanted it this way, and what the name/inCycle describe?)
-# inCycle values should be a number from a species edge
+#= basic check on node names and inCycle values
+inCycle: numberID of net's edge that the node maps to for degree-3 nodes.
+      -1 for nodes of degree 1 or 2 (which map to a node, not an edge)
+name: name of numberID (as string) of net's node that the node maps to,
+      for gene nodes of degree 1 or 2. No name for degree-3 nodes or root.
+=#
 Random.seed!(1624)
-genetree = PCS.simulatecoalescent(net, 1, 1)[1]
-for inode in 1:length(genetree.node)
-    print(inode)
-    node = genetree.node[inode]
-    isroot = node == genetree.node[genetree.root]
+genetree = PCS.simulatecoalescent(net, 1, 3)[1]
+speciesedgenumbers = [e.number for e in net.edge]
+speciesleafnames = tipLabels(net)
+for node in genetree.node
+    isroot = node === genetree.node[genetree.root]
     degree = length(node.edge)
-
-    # inCycle values should be a number from a species edge
-    speciesEdgeNumbers = Int64[]
-    for speciesEdge in net.edge
-        push!(speciesEdgeNumbers, speciesEdge.number)
-    end
-    @test node.inCycle == -1 || node.inCycle in speciesEdgeNumbers
-
+    @test degree in [1,2,3]
     if degree == 1
-        @test node.leaf && node.name != ""
+        @test node.leaf
+        @test replace(node.name, r"_\d*$" => "") in speciesleafnames # rm "_individualnumber" from tip name
+        @test node.inCycle == -1
     elseif degree == 2
         @test isroot || node.name != "" # degree-2 nodes have a name
-    elseif degree == 3
-        @test node.name == "" && node.inCycle != -1 # degree-3 nodes don't have a name but have inCycle
-    else
-        @test false # nodes should be degree 1, 2, or 3
-    end 
+        # to do: check that the name is one of the (ancestral) species in net
+        @test node.inCycle == -1
+    else # degree == 3
+        @test node.name == ""
+        @test node.inCycle in speciesedgenumbers
+    end
 end
 # names should be species node names or string from species node number
 # (john: ok, but i don't remember why this was useful.)

@@ -1,9 +1,12 @@
 using PhyloCoalSimulations
-import PhyloCoalSimulations as PCS
-using Test
-using Random
+
+using Distributions
+using HypothesisTests
 using PhyloNetworks
-import PhyloNetworks as PN
+using Random
+using Test
+const PN = PhyloNetworks
+const PCS = PhyloCoalSimulations
 
 @testset "PhyloCoalSimulations.jl" begin
     include("test_onepopulation.jl")
