@@ -10,7 +10,7 @@ Vector of incomplete edges, whose lengths have been increased, is modified in pl
 New nodes and their parent edges are created by coalescent events, numbered
 with consecutive integers starting at `nextlineageID`.
 
-Output: nextid, incremented by number of new lineages.
+Output: nextlineageID, incremented by number of new lineages.
 
 In lineages, edge lengths are also considered in coalescent units.
 
@@ -161,36 +161,68 @@ function initializetip(speciesnode::PN.Node, nindividuals::Integer,
 end
 
 """
-    trackmapping2population(forest, population_nodename, population_edgenumber)
+    map2population!(forest, population_node, populationid, nextlineageID)
 
-Update each incomplete edge `e` in the forest, to:
-- set to `population_edgenumber` the edge's `isCycle` attribute, and
-- set to `population_nodename` the name of the first node incident to the edge.
+Extend each incomplete edge in the forest with a new degree-2 node `n` and
+a new incomplete edge `e`, with the following information to map `n` and `e`
+into the species phylogeny:
+- `e.inCycle` is set to `populationid`, and
+- `n.name` is set to `population_node.name` if this name is non-empty, or
+  `string(population_node.number)` otherwise (with any negative sign replaced
+  by the string "minus").
+`e.number` and `n.number` are set to `nextlineageID`, which is incremented by 1
+for each incomplete edge in the forest.
+
+The forest is updated to contain the newly-created incomplete edges,
+replacing the old incomplete (and now complete) edges.
+
+Output: nextlineageID, incremented by the number of newly created degree-2 lineages.
 
 # example
 
 ```jldoctest
-julia> e1 = PhyloCoalSimulations.initializetip("s","1",1,"",0.1);
+julia> using PhyloNetworks; net = readTopology("(A:1,B:1);");
 
-julia> PhyloCoalSimulations.trackmapping2population!([e1], "10", 11)
+julia> leafA = net.node[1]; edge2A_number = net.edge[1].number;
 
-julia> e1.inCycle
-11
+julia> f = PhyloCoalSimulations.initializetip(leafA, 2, 4); # 2 edges, numbered 4 & 5
 
-julia> e1.node[1]
-PhyloNetworks.Node:
- number:1
- name:10
- leaf node
- attached to 1 edges, numbered: 1
+julia> PhyloCoalSimulations.map2population!(f, leafA, edge2A_number, 6)
+8
 
+julia> length(f)
+2
+
+julia> f[2]
+PhyloNetworks.Edge:
+ number:7
+ length:0.0
+ attached to 1 node(s) (parent first): 7
+
+julia> [e.node[1].name for e in f]
+2-element Vector{String}:
+ "A"
+ "A"
 ```
 """
-function trackmapping2population!(forest, pop_nodename, pop_edgenumber)
-    for e in forest
-        e.inCycle = pop_edgenumber
-        e.node[1].name = pop_nodename
+function map2population!(forest, pop_node, populationid, number)
+    popnodename = (pop_node.name == "" ? replace(string(pop_node.number), "-" => "minus") :
+                                         pop_node.name)
+    for i in eachindex(forest)
+        e_old = forest[i]
+        degree2node = PN.Node(number, false) # false because tree node (not hybrid)
+        # keep default inCycle = -1, because maps to population node, not population edge
+        degree2node.name = popnodename
+        push!(e_old.node, degree2node) # isChild1 true by default
+        push!(degree2node.edge, e_old)
+        e_new = PN.Edge(number, 0.0)   # length 0.0
+        e_new.inCycle = populationid
+        push!(e_new.node, degree2node)
+        push!(degree2node.edge, e_new)
+        forest[i] = e_new
+        number += 1
     end
+    return number
 end
 
 function cleanrootnode!(rootnode::PN.Node)

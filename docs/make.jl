@@ -14,7 +14,11 @@ makedocs(;
         assets=String[],
     ),
     pages=[
-        "Home" => "index.md",
+        "home" => "index.md",
+        "manual" => [
+            "getting started" => "man/getting_started.md",
+            "more examples" => "man/mapping_genetree_to_network.md",
+        ],
     ],
 )
 

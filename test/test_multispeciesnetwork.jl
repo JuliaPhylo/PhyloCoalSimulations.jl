@@ -19,71 +19,108 @@ genetree = PCS.simulatecoalescent(net, 2, 1)
 #= basic check on node names and inCycle values
 inCycle: numberID of net's edge that the node maps to for degree-3 nodes.
       -1 for nodes of degree 1 or 2 (which map to a node, not an edge)
+      max(edge numberID)+1 for degree-3 nodes that map to the infinite root edge.
 name: name of numberID (as string) of net's node that the node maps to,
       for gene nodes of degree 1 or 2. No name for degree-3 nodes or root.
 =#
-Random.seed!(1624)
-genetree = PCS.simulatecoalescent(net, 1, 3)[1]
 speciesedgenumbers = [e.number for e in net.edge]
+push!(speciesedgenumbers, maximum(speciesedgenumbers)+1)
 speciesleafnames = tipLabels(net)
-for node in genetree.node
+speciesintnodenames = String[]
+for n in net.node
+    n.leaf && continue
+    push!(speciesintnodenames, (n.name == "" ? replace(string(n.number), "-" => "minus") : n.name))
+end
+function checknodeattributes(genetree)
+  nd2 = 0 # number of degree-2 nodes in gene tree
+  for node in genetree.node
     isroot = node === genetree.node[genetree.root]
     degree = length(node.edge)
     @test degree in [1,2,3]
+    if degree == 2 nd2 += 1; end
     if degree == 1
         @test node.leaf
         @test replace(node.name, r"_\d*$" => "") in speciesleafnames # rm "_individualnumber" from tip name
         @test node.inCycle == -1
-    elseif degree == 2
-        @test isroot || node.name != "" # degree-2 nodes have a name
-        # to do: check that the name is one of the (ancestral) species in net
+    elseif degree == 2 && !isroot
+        @test node.name in speciesintnodenames # degree-2 nodes have a name
         @test node.inCycle == -1
-    else # degree == 3
+    else # root (of degree 2) or degree == 3
         @test node.name == ""
         @test node.inCycle in speciesedgenumbers
     end
+  end
+  return nd2
 end
-# names should be species node names or string from species node number
-# (john: ok, but i don't remember why this was useful.)
+myseed = 1624
+Random.seed!(myseed)
+gt1 = simulatecoalescent(net, 1, 3)[1]
+ndegree2 = checknodeattributes(gt1)
+@test ndegree2 == 1 # root only, when nodemapping=false
+Random.seed!(myseed)  # same as before
+gt2 = simulatecoalescent(net, 1, 3; nodemapping=true)[1]
+ndegree2 = checknodeattributes(gt2)
+@test ndegree2 >= 9
+# fuse degree-2 nodes in gt2, then check that gt2 == gt1
+done = false
+while !done
+    done = true
+    for i in reverse(eachindex(gt2.node))
+        n = gt2.node[i]
+        (length(n.edge) == 2 && n !== gt2.node[gt2.root]) || continue
+        done = false
+        PN.fuseedgesat!(i, gt2)
+    end
+end
+@test hardwiredClusterDistance(gt1, gt2, true)==0
+# ideally: also check for equal edge lengths. Not done here
 
-# to do: simulate with 1000 gene trees,
-net = net # network with hybrid ladder, like above
+#= simulate 1000 gene trees, 1 indiv/species, then check:
+- correct quartet CFs (approximately)
+- correct distribution of pairwise distances: mixture of shifted exponential(s)
+on same net as earlier (4-species net, but rotated)
+=#
+net = PN.readTopology("((t5:1.228,((t7:0.118,t2:0.118):1.095,(#H17:0.735::0.4)#H14:0.0::0.7):0.014):0.384,(#H14:0.14::0.3,(t8:0.478)#H17:0.875::0.6):0.259);")
 nsim = 1000
 Random.seed!(1602)
 genetrees = PCS.simulatecoalescent(net, nsim, 1)
-# then check a few things, e.g.:
-# calculate qCFs, then check that they aren't too far from expectations
-alpha = 0.05
-expCF = [0.1104, 0.7792, 0.1104] # proof given in .jpeg in test folder
-obsCF, t = PN.countquartetsintrees(genetrees)
+α = 0.05 # to test "approximately" correct results
+#= expected CF:
+plot(net, :R, showEdgeNumber=true, showGamma=true);
+t2,t7 sister after cut edge 6, t8 only descendant of either hybrid node, so:
+expCFminor = exp(-net.edge[4].length) * ((0.6 + 0.4*0.3)*exp(-net.edge[7].length) + 0.4*0.7)/3
+=#
+expCFminor = 0.11039698101750112 # for t2t5|t7t8 and t2t8|t5t7
+expCF = [expCFminor, 1-2*expCFminor, expCFminor]
+obsCF, taxa = PN.countquartetsintrees(genetrees) # taxa alphabetically: t2,t5,t7,t8
 obsCF = Int.(obsCF[1].data[1:3]*nsim) # change format to what HypothesisTests expects
 qCFtest = HypothesisTests.ChisqTest(obsCF, expCF)
-@test pvalue(qCFtest) >= alpha
+@test pvalue(qCFtest) >= α
 # get distances between t2-t7, or t2-t5, or t5-t7: those should be minimum value + exponential.
 # (note for later: there is repetition below that could probably be vectorized, or nested inside for-loops)
-dist_t2t7_min = 2*(0.118)
-dist_t2t5_min = 2*(0.118 + 1.095 + 0.014)
-dist_t5t7_min = 2*(0.118 + 1.095 + 0.014)
-#dist_t2t8_min = Inf # would need to do calculation
-dist_t2t7 = Float64[]
-dist_t2t5 = Float64[]
-dist_t5t7 = Float64[]
+d_t2t7_min = 0.236 # sum(net.edge[i].length for i in [2,3])
+d_t2t5_min = 2.455 # sum(net.edge[i].length for i in [1,3,4,7])
+d_t5t7_min = 2.455 # sum(net.edge[i].length for i in [1,2,4,7])
+#= d_t2t8 ~ mixture((gam1 * Dirac(min1) + gam2 * Dirac(min2)) + Exp(2))
+   but not sure how to code this mixture of convolutions with Distributions.
+d_t2t8_min1 = 2.426 # sum(net.edge[i].length for i in [3,4, 10,5,6])
+d_t2t8_min2 = 3.223 # sum(net.edge[i].length for i in [3,4,7,8, 10,11,12])
+d_t2t8_min2 = 3.223 # sum(net.edge[i].length for i in [3,4,7,8, 10,5,9,12])
+d_t2t8_gam1 = 0.28  # 0.4*0.7: prod(net.edge[i].gamma for i in [5,6])
+d_t2t8_gam2 = 0.72
+d_t2t8 = Float64[]
+=#
+d_t2t7 = Float64[]; d_t2t5 = Float64[]; d_t5t7 = Float64[]
 for tree in genetrees
     distances = PN.pairwiseTaxonDistanceMatrix(tree)
-    tips = PN.tipLabels(tree)
-    index_t2 = findall(tips .== "t2")
-    index_t5 = findall(tips .== "t5")
-    index_t7 = findall(tips .== "t7")
-    push!(dist_t2t7, distances[index_t2, index_t7][1])
-    push!(dist_t2t5, distances[index_t2, index_t5][1])
-    push!(dist_t5t7, distances[index_t5, index_t7][1])
+    o = sortperm(PN.tipLabels(tree)) # order to get taxa alphabetically: t2, t5, t7, t8
+    push!(d_t2t7, distances[o[1], o[3]])
+    push!(d_t2t5, distances[o[1], o[2]])
+    push!(d_t5t7, distances[o[2], o[3]])
+    # push!(d_t2t8, distances[o[2], o[4]])
 end
-test_t2t7 = HypothesisTests.OneSampleADTest(dist_t2t7 - repeat([dist_t2t7_min],nsim), Distributions.Exponential(2))
-test_t2t5 = HypothesisTests.OneSampleADTest(dist_t2t5 - repeat([dist_t2t5_min],nsim), Distributions.Exponential(2))
-test_t5t7 = HypothesisTests.OneSampleADTest(dist_t5t7 - repeat([dist_t5t7_min],nsim), Distributions.Exponential(2))
-@test pvalue(test_t2t7) >= alpha
-@test pvalue(test_t2t5) >= alpha
-@test pvalue(test_t5t7) >= alpha
-
-
+expdist2 = Distributions.Exponential(2)
+@test pvalue(HypothesisTests.OneSampleADTest(d_t2t7 .- d_t2t7_min, expdist2)) >= α
+@test pvalue(HypothesisTests.OneSampleADTest(d_t2t5 .- d_t2t5_min, expdist2)) >= α
+@test pvalue(HypothesisTests.OneSampleADTest(d_t5t7 .- d_t5t7_min, expdist2)) >= α
 end
