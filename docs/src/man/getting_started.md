@@ -56,7 +56,7 @@ from the root to the hybridization node H1 is different depending if we go
 through the major edge (0.6+0.7=1.3) or the minor edge (0.5+0.6=1.1).
 
 Coalescent simulations can be performed along on such networks, also
-along non-ultrametric network.
+along non-ultrametric networks.
 If the network is ultrametric (time-consistent, and with all tips at the
 same distance from the root), then gene trees will also be ultrametric.
 

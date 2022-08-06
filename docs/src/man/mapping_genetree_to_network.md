@@ -74,14 +74,25 @@ network like this:
   before coalescing with the ancestor of the other lineages (which have already
   coalesced by then).
 
+## cleaning gene trees
+
 Almost all examples below use this mapping information via the extra degree-2
 nodes and the extra edges between these nodes.
 
 But we may want to "clean" gene trees of their degree-2 nodes at some point.
 This can be done with the `PhyloNetworks` utility `removedegree2nodes!`, like this:
-`PhyloNetworks.removedegree2nodes!(tree, true)`. The option `true` is to keep
-the root, even if it's of degree 2.
-[PhyloNetworks v0.15.0 does not have this option and removes the root of degree 2, but the option will be available in the next version of PhyloNetworks. This is not a problem for simulating sequences along gene trees when using a reversible substitution model, for which the root placement doesn't matter.]
+
+```julia
+PhyloNetworks.removedegree2nodes!(tree, true)
+```
+The option `true` is to keep the root, even if it's of degree 2.
+
+!!! note
+    PhyloNetworks v0.15.0 does not have this option and
+    removes the root of degree 2, but the option will be available in the next
+    version of PhyloNetworks.
+    This is not a problem for simulating sequences along gene trees when using a
+    reversible substitution model, for which the root placement doesn't matter.
 
 # converting coalescent units to number of generations
 
