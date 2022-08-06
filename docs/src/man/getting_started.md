@@ -51,6 +51,15 @@ nothing # hide
 ```
 ![3-taxon network](../assets/figures/net3taxa.svg)
 
+Note that this example network is not time consistent: the length of the path
+from the root to the hybridization node H1 is different depending if we go
+through the major edge (0.6+0.7=1.3) or the minor edge (0.5+0.6=1.1).
+
+Coalescent simulations can be performed along on such networks, also
+along non-ultrametric network.
+If the network is ultrametric (time-consistent, and with all tips at the
+same distance from the root), then gene trees will also be ultrametric.
+
 ### basic example: simulate, save to file, plot
 
 We use [`simulatecoalescent`](@ref) to simulate gene trees along this network.
@@ -59,6 +68,10 @@ Below, we simulate 2 gene trees. By default, there's 1 individual per species.
 ```@repl getting_started
 trees = simulatecoalescent(net, 2)
 ```
+
+Branch lengths are assumed to be in coalescent units in the species network
+(number of generations / effective population size), and edge lengths in gene
+trees are also in coalescent units.
 
 We can work with these gene trees within Julia with downstream code,
 and/or we can save them to a file:

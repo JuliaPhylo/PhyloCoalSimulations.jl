@@ -74,7 +74,40 @@ network like this:
   before coalescing with the ancestor of the other lineages (which have already
   coalesced by then).
 
-## example use: counting deep coalescences
+## converting coalescent units to number of generations
+
+Edge lengths in gene trees are simulated in coalescent units.
+These lengths can be converted into numbers of generations by multiplying by
+the effective population size Nₑ, since coalescent units are `u = g/Nₑ`.
+This can be done with different Nₑ's across different edges in the network,
+including the root edge. Here is an example, with Nₑ set to 1,000 in all
+populations (including the population above the root),
+except in edge 6: the population leading to species A has its Nₑ set to 10,000.
+
+```@repl mapping
+Ne = Dict(e.number => 1_000 for e in net.edge);
+push!(Ne, 8 => 1_000); # add Ne for the edge above the network's root
+Ne[6] = 10_000;        # higher population size for the edge to species A
+Ne
+# convert edge lengths in gene tree from coalescent units to # generations
+tree_in_generations = deepcopy(tree)
+for e in tree_in_generations.edge
+  e.length = round(e.length * Ne[e.inCycle]) # round: to get integers
+end
+writeTopology(tree_in_generations, round=true, digits=4) # after rate variation
+```
+
+Note that the simulation model assumes an infinite-Nₑ approximation,
+so the rescaling of edge lengths from coalescent units to number of generations
+will be imperfect for very small populations size. With the extreme Nₑ=1,
+coalescences should be immediate in a single generation back in time: g=1.
+Using the approximation, the simulated number of generations will typically be
+between 0-3 generations. But this is an extreme case, and the approximation
+should be very good even for moderate Nₑ's.
+
+# example uses
+
+##  counting deep coalescences
 
 The number of deep coalescences can be quantified as the number of
 "extra" lineages due to incomplete lineage sorting, that can be calculated
@@ -109,7 +142,7 @@ deepcoalescence = sum(values(node_count))
 ```
 On the particular gene tree we simulated, we counted 1 deep coalescence.
 
-## example use: number of lineages inherited via gene flow
+## number of lineages inherited via gene flow
 
 Our network has inheritance γ=0.4 on the minor edge, which we'll call the
 "gene flow" edge, and γ=0.6 on the major hybrid edge, parent to H1 on the major tree.
@@ -155,7 +188,7 @@ nlineages_major    = sum(sum(e.inCycle == 3 for e in gt.edge) for gt in genetree
 proportion_geneflow = nlineages_geneflow / (nlineages_geneflow + nlineages_major)
 ```
 
-## example use: rate variation across species
+## rate variation across species
 
 The gene trees resulting from `simulatecoalescent` have their edge lengths
 in coalescent units. One may want to convert them to substitutions per site,
