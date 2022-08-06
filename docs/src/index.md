@@ -7,7 +7,6 @@ CurrentModule = PhyloCoalSimulations
 [PhyloCoalSimulations](https://github.com/cecileane/PhyloCoalSimulations.jl)
 is a [Julia](http://julialang.org) package to
 simulate phylogenies under the coalescent.
-
 It depends on [PhyloNetworks](https://github.com/crsl4/PhyloNetworks.jl)
 for the phylogenetic data structures, and manipulation of phylogenies.
 

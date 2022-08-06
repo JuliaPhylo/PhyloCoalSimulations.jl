@@ -25,4 +25,5 @@ makedocs(;
 deploydocs(;
     repo="github.com/cecileane/PhyloCoalSimulations.jl",
     devbranch="main",
+    push_preview = true,
 )
