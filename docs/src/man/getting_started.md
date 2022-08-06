@@ -55,7 +55,7 @@ Note that this example network is not time consistent: the length of the path
 from the root to the hybridization node H1 is different depending if we go
 through the major edge (0.6+0.7=1.3) or the minor edge (0.5+0.6=1.1).
 
-Coalescent simulations can be performed along on such networks, also
+Coalescent simulations can be performed along such networks, also
 along non-ultrametric networks.
 If the network is ultrametric (time-consistent, and with all tips at the
 same distance from the root), then gene trees will also be ultrametric.
@@ -96,8 +96,9 @@ R"par"(mar=[.1,.1,.1,.1]); R"layout"([1 2]); # hide
 using DataFrames
 for i in 1:2
   gt = trees[i]
-  plot(gt, :R, tipOffset=0.1, edgeLabel=DataFrame(number=[e.number for e in gt.edge],
-                                                  label=[e.inCycle for e in gt.edge]));
+  plot(gt, :R, tipOffset=0.1, useEdgeLength=true,
+               edgeLabel=DataFrame(number = [e.number  for e in gt.edge],
+                                   label  = [e.inCycle for e in gt.edge]));
   R"mtext"("gene $i", line=-1) # hide
 end
 R"mtext"("numbers: network edge each gene lineage maps to, at time of coalescence.\n8 = number of edge above the network root", side=1, line=-1, outer=true);  # hide
