@@ -96,7 +96,7 @@ R"par"(mar=[.1,.1,.1,.1]); R"layout"([1 2]); # hide
 using DataFrames
 for i in 1:2
   gt = trees[i]
-  plot(gt, :R, tipOffset=0.1, useEdgeLength=true,
+  plot(gt, :R, tipOffset=0.1,
                edgeLabel=DataFrame(number = [e.number  for e in gt.edge],
                                    label  = [e.inCycle for e in gt.edge]));
   R"mtext"("gene $i", line=-1) # hide
