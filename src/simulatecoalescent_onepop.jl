@@ -59,8 +59,6 @@ function simulatecoal_onepopulation!(lineagelist::AbstractVector,
     poplen > 0.0 || return(nextid)
     # at this point: the list has 1 or more lineages
     nlineage = length(lineagelist)
-    poplen < Inf || nlineage > 1 ||
-        error("there should be 2 or more lineages at the start of the infinite root population")
     timeleft = poplen
     while true
         if nlineage == 1 # then no one can coalesce
@@ -100,6 +98,7 @@ Both `n.inCycle` and `e.inCycle` are set to `populationid`.
 function coalescence_edge(e1,e2,number,populationid)
     parentnode = PN.Node(number, false) # false because tree node (not hybrid)
     parentnode.inCycle = populationid
+    # john: are the edge/node relationships below supposed to be directed in any way?
     push!(e1.node, parentnode) # isChild1 true by default
     push!(e2.node, parentnode)
     push!(parentnode.edge, e1)
@@ -147,6 +146,7 @@ function initializetip(speciesnode::PN.Node, nindividuals::Integer,
                        number::Integer, delim=nothing,
                        len=0.0::AbstractFloat)
     sname = speciesnode.name
+    speciesnode.leaf || error("initializing at a non-leaf node?")
     sname != "" || error("empty name: initializing at a non-leaf node?")
     forest = PN.Edge[]
     if isnothing(delim)
@@ -213,6 +213,7 @@ function map2population!(forest, pop_node, populationid, number)
         degree2node = PN.Node(number, false) # false because tree node (not hybrid)
         # keep default inCycle = -1, because maps to population node, not population edge
         degree2node.name = popnodename
+        # john: how do we know that the edges here are correctly directed?
         push!(e_old.node, degree2node) # isChild1 true by default
         push!(degree2node.edge, e_old)
         e_new = PN.Edge(number, 0.0)   # length 0.0
@@ -262,13 +263,13 @@ function convert2tree!(rootnode::PN.Node)
         @error("edge numbers are not all distinct")
     ntaxa = 0
     for nn in net.node # collect leaf names and # of leaves
+        nn.name == "" || push!(net.names, nn.name)
         nn.leaf == (length(nn.edge)==1) ||
             error("incorrect .leaf for node number $nn")
         nn.leaf || continue
         ntaxa += 1
         nn.name != "" || error("leaf without name")
         push!(net.leaf,  nn)
-        push!(net.names, nn.name)
     end
     net.numTaxa = ntaxa
     return net
