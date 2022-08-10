@@ -16,6 +16,8 @@ For a tutorial, see the manual:
 Pages = [
     "man/getting_started.md",
     "man/mapping_genetree_to_network.md",
+    "man/converting_coal2generation_units.md",
+    "man/more_examples.md",
 ]
 Depth = 3
 ```
