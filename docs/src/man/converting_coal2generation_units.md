@@ -30,8 +30,9 @@ let's set its Nₑ to 10,000.
 
 ```@repl converting
 Ne = Dict(e.number => 1_000 for e in net.edge);
-push!(Ne, 8 => 1_000); # add Ne for the edge above the network's root
-Ne[6] = 10_000;        # higher population size for the edge to species A
+rootedgenumber = PhyloCoalSimulations.get_rootedgenumber(net)
+push!(Ne, rootedgenumber => 1_000); # add Ne for the edge above the network's root
+Ne[6] = 10_000; # higher population size for the edge to species A
 Ne
 writeTopology(tree, round=true) # lengths in coalescent units: before unit conversion
 # convert edge lengths in gene tree from coalescent units to # generations
@@ -49,3 +50,42 @@ Using the approximation, the simulated number of generations will typically be
 between 0-3 generations. But this is an extreme case, and the approximation
 should be very good even for moderate Nₑ's.
 
+# starting with # of generations in the network
+
+If our input network has edge lengths in number of generations,
+then we need extra information to simulate under the coalescent:
+we need the effective size of each population. If the population
+size is constant, then `g` generations correspond to `u = g/Nₑ`
+coalescent units. If the population size varies along a single population edge,
+then the coalescence rate on that edge is determined by the geometric mean
+``\widebar{N_e}`` of the population size:
+``u = \int_0^g 1/N_e(t) dt = g/\widebar{N_e}``.
+
+Let's assume we have a network with number of generations as edge lengths:
+```@repl converting
+net_gen = readTopology("((C:900,(B:200)#H1:0.7::600)I1:600,(#H1:0.6::400,A:1000)I2:500)I3;");
+```
+and that we have a dictionary listing the (geometric mean) population
+size along each edge of the species network, and also along the root edge
+above the network. Below, we simulate a population size for each population,
+from a uniform distribution between 1,000 and 1,500.
+
+```@repl converting
+# uniform distribution between 1000 and 1500, that we can draw from later
+Ne_distribution() = round(Int, 1000 + 500*Random.rand());
+Ne = Dict(e.number => Ne_distribution() for e in net_gen.edge);
+rootedgenumber = PhyloCoalSimulations.get_rootedgenumber(net_gen)
+push!(Ne, rootedgenumber => Ne_distribution()); # Nₑ above the root
+Ne
+```
+
+To simulate gene trees with edge lengths in generations,
+we can use a convenience wrapper function that
+- creates the species phylogeny with edge lengths in coalescent units,
+- simulates gene trees with lengths in coalescent units, then
+- converts gene trees to have lengths in number of generations:
+
+```@repl converting
+genetree = simulatecoalescent(net_coal,3,1, Ne; nodemapping=true);
+writeMultiTopology(genetree, stdout) # 3 gene trees, lengths in #generations
+```

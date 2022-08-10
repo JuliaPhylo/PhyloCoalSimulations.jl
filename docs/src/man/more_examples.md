@@ -112,7 +112,7 @@ using Distributions
 lognormal_rate_dist = LogNormal(-0.125, 0.5) # μ = -σ²/2 to get a mean of 1.
 networkedge_rate = Dict(e.number => rand(lognormal_rate_dist) for e in net.edge)
 # add entry for the edge above the network's root. Find its number first.
-rootedgenumber = maximum(e.number for e in net.edge) + 1
+rootedgenumber = PhyloCoalSimulations.get_rootedgenumber(net)
 push!(networkedge_rate, rootedgenumber => rand(lognormal_rate_dist))
 writeTopology(tree, round=true, digits=4) # before rate variation
 # multiply the length of each gene lineage by the rate of the species edge it maps into
