@@ -10,3 +10,4 @@ RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
 
 [compat]
 Documenter = "~0.27"
+PhyloPlots = "1"

@@ -1,9 +1,17 @@
 """
-    simulatecoalescent(net, nloci, nindividuals=1; nodemapping=false)
+    get_rootedgenumber(network)
+
+1 + maximum of 0 and of all the network's edge numbers:
+can be used as a unique identifier of the edge above the network's root.
+"""
+get_rootedgenumber(net) = max(0, maximum(e.number for e in net.edge)) + 1
+
+"""
+    simulatecoalescent(net, nloci, nindividuals; nodemapping=false)
 
 Simulate `nloci` gene trees with `nindividuals` from each species
-under the multispecies network coalescent, along network `net`.
-Branch lengths in `net` are interpreted as being in coalescent units
+under the multispecies network coalescent, along network `net`
+whose branch lengths are assumed to be in **coalescent units**
 (ratio: number of generations / effective population size).
 The coalescent model uses the infinite-population-size approximation.
 
@@ -26,7 +34,7 @@ is carried by the `.name` attribute. Namely:
 - The gene tree's root node (of degree 2) represents a coalescent event
   along the network's root edge.
   Its `.inCycle` attribute is the number assigned to the network's root edge,
-  which is set to the maximum edge number + 1.
+  which is set by [`get_rootedgenumber`](@ref) as the maximum edge number + 1.
 - A leaf (or degree-1 node) represents an individual. It maps to a species
   in `net`. The individual leaf name is set to the species name
   if `nindividuals` is 1. Otherwise, its name is set to `speciesname_i`
@@ -51,7 +59,7 @@ julia> net = readTopology("(A:1,B:1);"); # branch lengths of 1 coalescent unit
 
 julia> using Random; Random.seed!(54321); # for replicability of examples below
 
-julia> simulatecoalescent(net, 2) # 2 gene trees, default of 1 individual/species
+julia> simulatecoalescent(net, 2, 1) # 2 gene trees, 1 individual/species
 2-element Vector{HybridNetwork}:
  PhyloNetworks.HybridNetwork, Rooted Network
 2 edges
@@ -126,7 +134,7 @@ julia> [(tree_edge_number = e.number, pop_edge_number = e.inCycle) for e in tree
  (tree_edge_number = 1, pop_edge_number = 1)
 ```
 """
-function simulatecoalescent(net::PN.HybridNetwork, nloci, nindividuals=1;
+function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals;
         nodemapping=false)
     if isa(nindividuals, AbstractDict)
         issubset(PN.tipLabels(net), keys(nindividuals)) || error("nindividuals is missing some species")
@@ -134,7 +142,7 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci, nindividuals=1;
     elseif isa(nindividuals, Integer)
         nindividuals = Dict(n.name => nindividuals for n in net.leaf)
     else
-        error("nindividuals should be an integer or vector of integers")
+        error("nindividuals should be an integer or dictionary of integers")
     end
     for e in net.edge
         e.hybrid && e.gamma == -1.0 && error("the network needs gamma values")
@@ -155,7 +163,7 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci, nindividuals=1;
         push!(parentedges, parentedgelist)
         push!(childedges, childedgelist)
     end
-    rootedgenumber = max(0, maximum(e.number for e in net.edge)) + 1
+    rootedgenumber = get_rootedgenumber(net)
 
     genetreelist = Vector{PN.HybridNetwork}(undef,nloci)
     for ilocus in 1:nloci
@@ -223,6 +231,91 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci, nindividuals=1;
                 genetreelist[ilocus] = convert2tree!(rootnode)
             end
         end
+    end
+    return genetreelist
+end
+
+"""
+    simulatecoalescent(net, nloci, nindividuals, populationsize;
+        nodemapping=false, round_generationnumber=true)
+
+Simulate `nloci` gene trees with `nindividuals` from each species
+under the multispecies network coalescent, along network `net`,
+whose branch lengths are assumed to be in **number of generations**.
+`populationsize` should be a single number, assumed to be the
+(haploid) effective population size Nₑ, constant across the species phylogeny.
+Alternatively, `populationsize` can be a dictionary mapping the number of
+each edge in `net` to its Nₑ, including an extra edge number for the
+population above the root of the network.
+
+Coalescent units are then calculated as `u=g/Nₑ` where `g` is the edge length
+in `net` (number of generations), and the coalescent model is applied
+using the infinite-population-size approximation.
+
+Output: vector of gene trees with edge lengths in number of generations,
+calculated as `g=uNₑ` and then rounded to be an integer, unless
+`round_generationnumber` is false.
+
+!!! warning
+    When `populationsize` Nₑ is not provided as input, all edge lengths are in
+    coalescent units. When `populationsize` is given as an argument, all edge
+    lengths are in number of generations.
+    The second method (using # generation and Nₑ as input) is a wrapper around
+    the first (using coalescent units).
+
+```jldoctest
+julia> using PhyloNetworks
+
+julia> net = readTopology("(A:500,B:500);"); # branch lengths of 100 generations
+
+julia> Ne = Dict(e.number => 1_000 for e in net.edge);
+
+julia> rootedgenumber = PhyloCoalSimulations.get_rootedgenumber(net)
+3
+
+julia> push!(Ne, rootedgenumber => 2_000) # Ne for population above the root
+Dict{Int64, Int64} with 3 entries:
+  2 => 1000
+  3 => 2000
+  1 => 1000
+
+julia> using Random; Random.seed!(54321); # for replicability of example below
+
+julia> genetrees = simulatecoalescent(net, 2, 1, Ne);
+
+julia> writeMultiTopology(genetrees, stdout) # branch lengths: number of generations
+(B:546.0,A:546.0);
+(B:3155.0,A:3155.0);
+
+```
+"""
+function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals, Neff;
+        nodemapping=false, round_generationnumber=true)
+    popedgenumbers = [e.number for e in net.edge]
+    push!(popedgenumbers, get_rootedgenumber(net))
+    if isa(Neff, AbstractDict)
+        issubset(popedgenumbers, keys(Neff)) ||
+            error("populationsize is missing some edge numbers, or the root edge number.")
+        valtype(Neff) <: Number || error("population sizes should be numerical")
+    elseif isa(Neff, Number)
+        Neff = Dict(num => Neff for num in popedgenumbers)
+    else
+        error("populationsize should be a number or dictionary")
+    end
+    # network with lengths in coalescent units
+    net_coal = deepcopy(net)
+    for e in net_coal.edge
+        e.length = e.length / Neff[e.number]
+    end
+    # simulate gene trees
+    genetreelist = simulatecoalescent(net_coal,nloci,nindividuals; nodemapping=true);
+    # convert lengths to #generations in gene trees
+    for gt in genetreelist
+        for e in gt.edge
+            len = e.length * Neff[e.inCycle]
+            e.length = (round_generationnumber ? round(len) : len )
+        end
+        nodemapping || PN.removedegree2nodes!(gt, true) # 'true' option requires PN v0.15.1
     end
     return genetreelist
 end

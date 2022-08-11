@@ -1,7 +1,7 @@
 ```@setup getting_started
 using PhyloNetworks, PhyloCoalSimulations, RCall
-mkpath("../assets/figures")
-figname(x) = joinpath("..", "assets", "figures", x)
+figpath = joinpath("..", "assets", "figures"); mkpath(figpath)
+figname(x) = joinpath(figpath, x)
 using Random; Random.seed!(432)
 ```
 
@@ -42,23 +42,36 @@ net = readTopology("((C:0.9,(B:0.2)#H1:0.7::0.6):0.6,(#H1:0.6,A:1):0.5);");
 using PhyloPlots
 R"svg"(figname("net3taxa.svg"), width=6, height=3); # hide
 R"par"(mar=[.1,.1,.1,.1]); R"layout"([1 2]); # hide
-plot(net, :R, showEdgeNumber=true, showIntNodeLabel=true, showGamma=true, tipOffset=0.1);
-R"mtext"("in black: edge numbers", side=1, line=-1);  # hide
-plot(net, :R, showEdgeLength=true, useEdgeLength=true, tipOffset=0.1);
+plot(net, showedgenumber=true, shownodelabel=true, showgamma=true, tipoffset=0.1);
+R"mtext"("in grey: edge numbers", side=1, line=-1);  # hide
+plot(net, showedgelength=true, useedgelength=true, tipoffset=0.1);
 R"mtext"("in black: edge lengths", side=1, line=-1);  # hide
 R"dev.off()" # hide
 nothing # hide
 ```
 ![3-taxon network](../assets/figures/net3taxa.svg)
 
+Note that this example network is not time consistent: the length of the path
+from the root to the hybridization node H1 is different depending if we go
+through the major edge (0.6+0.7=1.3) or the minor edge (0.5+0.6=1.1).
+
+Coalescent simulations can be performed along such networks, also
+along non-ultrametric networks.
+If the network is ultrametric (time-consistent, and with all tips at the
+same distance from the root), then gene trees will also be ultrametric.
+
 ### basic example: simulate, save to file, plot
 
 We use [`simulatecoalescent`](@ref) to simulate gene trees along this network.
-Below, we simulate 2 gene trees. By default, there's 1 individual per species.
+Below, we simulate 2 gene trees, with 1 individual per species.
 
 ```@repl getting_started
-trees = simulatecoalescent(net, 2)
+trees = simulatecoalescent(net, 2, 1)
 ```
+
+Branch lengths are assumed to be in coalescent units in the species network
+(number of generations / effective population size), and edge lengths in gene
+trees are also in coalescent units.
 
 We can work with these gene trees within Julia with downstream code,
 and/or we can save them to a file:
@@ -83,8 +96,9 @@ R"par"(mar=[.1,.1,.1,.1]); R"layout"([1 2]); # hide
 using DataFrames
 for i in 1:2
   gt = trees[i]
-  plot(gt, :R, tipOffset=0.1, edgeLabel=DataFrame(number=[e.number for e in gt.edge],
-                                                  label=[e.inCycle for e in gt.edge]));
+  plot(gt, tipoffset=0.1,
+           edgelabel=DataFrame(number = [e.number  for e in gt.edge],
+                               label  = [e.inCycle for e in gt.edge]));
   R"mtext"("gene $i", line=-1) # hide
 end
 R"mtext"("numbers: network edge each gene lineage maps to, at time of coalescence.\n8 = number of edge above the network root", side=1, line=-1, outer=true);  # hide

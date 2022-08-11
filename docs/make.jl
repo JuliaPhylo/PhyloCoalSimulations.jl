@@ -17,7 +17,9 @@ makedocs(;
         "home" => "index.md",
         "manual" => [
             "getting started" => "man/getting_started.md",
-            "more examples" => "man/mapping_genetree_to_network.md",
+            "mapping gene trees into the species network" => "man/mapping_genetree_to_network.md",
+            "converting between units" => "man/converting_coal2generation_units.md",
+            "more examples" => "man/more_examples.md",
         ],
     ],
 )
@@ -25,4 +27,5 @@ makedocs(;
 deploydocs(;
     repo="github.com/cecileane/PhyloCoalSimulations.jl",
     devbranch="main",
+    push_preview = true,
 )
