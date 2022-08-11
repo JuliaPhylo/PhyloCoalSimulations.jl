@@ -11,7 +11,7 @@ as detailed in the documentation of function [`simulatecoalescent`](@ref).
 
 We give examples below of how we may use this mapping information.
 
-## naming internal nodes in the network and gene trees
+## naming internal nodes
 
 First, it's useful to name internal nodes in the network, to which we
 can later map nodes in the gene tree.
@@ -85,19 +85,7 @@ nodes and the extra edges between these nodes.
 But we may want to "clean" gene trees of their degree-2 nodes at some point.
 This can be done with the `PhyloNetworks` utility `removedegree2nodes!`, like this:
 
-```julia
+```@repl mapping
 PhyloNetworks.removedegree2nodes!(tree, true)
 ```
 The option `true` is to keep the root, even if it's of degree 2.
-
-!!! note
-    This option is available in the development version of PhyloNetworks
-    (and will be available in the next registered version).
-    Using PhyloNetworks v0.15.0, which does not have this option, do this instead:
-    ```julia
-    PhyloNetworks.removedegree2nodes!(tree)
-    ```
-    It will remove *all* degree-2 nodes, including the root.
-    This is not a problem for simulating sequences along gene trees when using a
-    reversible substitution model, for which the root placement doesn't matter.
-

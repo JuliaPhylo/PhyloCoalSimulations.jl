@@ -239,10 +239,6 @@ end
     simulatecoalescent(net, nloci, nindividuals, populationsize;
         nodemapping=false, round_generationnumber=true)
 
-!!! info
-    Wrapper around the `simulatecoalescent` method that uses edge lengths
-    in coalescent units and that does not take `populationsize` as argument.
-
 Simulate `nloci` gene trees with `nindividuals` from each species
 under the multispecies network coalescent, along network `net`,
 whose branch lengths are assumed to be in **number of generations**.
@@ -260,6 +256,13 @@ Output: vector of gene trees with edge lengths in number of generations,
 calculated as `g=uNₑ` and then rounded to be an integer, unless
 `round_generationnumber` is false.
 
+!!! warning
+    When `populationsize` Nₑ is not provided as input, all edge lengths are in
+    coalescent units. When `populationsize` is given as an argument, all edge
+    lengths are in number of generations.
+    The second method (using # generation and Nₑ as input) is a wrapper around
+    the first (using coalescent units).
+
 ```jldoctest
 julia> using PhyloNetworks
 
@@ -268,6 +271,7 @@ julia> net = readTopology("(A:500,B:500);"); # branch lengths of 100 generations
 julia> Ne = Dict(e.number => 1_000 for e in net.edge);
 
 julia> rootedgenumber = PhyloCoalSimulations.get_rootedgenumber(net)
+3
 
 julia> push!(Ne, rootedgenumber => 2_000) # Ne for population above the root
 Dict{Int64, Int64} with 3 entries:
@@ -275,21 +279,14 @@ Dict{Int64, Int64} with 3 entries:
   3 => 2000
   1 => 1000
 
-julia> using Random; Random.seed!(54321); # for replicability of examples below
+julia> using Random; Random.seed!(54321); # for replicability of example below
 
-julia> simulatecoalescent(net, 2, 1, Ne)
-2-element Vector{HybridNetwork}:
- HybridNetwork, Rooted Network
-2 edges
-3 nodes: 2 tips, 0 hybrid nodes, 1 internal tree nodes.
-tip labels: B, A
+julia> genetrees = simulatecoalescent(net, 2, 1, Ne);
+
+julia> writeMultiTopology(genetrees, stdout) # branch lengths: number of generations
 (B:546.0,A:546.0);
-
- HybridNetwork, Rooted Network
-2 edges
-3 nodes: 2 tips, 0 hybrid nodes, 1 internal tree nodes.
-tip labels: B, A
 (B:3155.0,A:3155.0);
+
 ```
 """
 function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals, Neff;

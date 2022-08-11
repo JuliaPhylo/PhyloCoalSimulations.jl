@@ -63,10 +63,10 @@ same distance from the root), then gene trees will also be ultrametric.
 ### basic example: simulate, save to file, plot
 
 We use [`simulatecoalescent`](@ref) to simulate gene trees along this network.
-Below, we simulate 2 gene trees. By default, there's 1 individual per species.
+Below, we simulate 2 gene trees, with 1 individual per species.
 
 ```@repl getting_started
-trees = simulatecoalescent(net, 2)
+trees = simulatecoalescent(net, 2, 1)
 ```
 
 Branch lengths are assumed to be in coalescent units in the species network

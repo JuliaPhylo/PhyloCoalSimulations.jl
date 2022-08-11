@@ -62,16 +62,7 @@ gt2 = simulatecoalescent(net, 1, 3; nodemapping=true)[1]
 ndegree2 = checknodeattributes(gt2)
 @test ndegree2 >= 9
 # fuse degree-2 nodes in gt2, then check that gt2 == gt1
-done = false
-while !done
-    done = true
-    for i in reverse(eachindex(gt2.node))
-        n = gt2.node[i]
-        (length(n.edge) == 2 && n !== gt2.node[gt2.root]) || continue
-        done = false
-        PN.fuseedgesat!(i, gt2)
-    end
-end
+PN.removedegree2nodes!(gt2, true)
 @test hardwiredClusterDistance(gt1, gt2, true)==0
 # ideally: also check for equal edge lengths. Not done here
 
@@ -123,4 +114,11 @@ expdist2 = Distributions.Exponential(2)
 @test pvalue(HypothesisTests.OneSampleADTest(d_t2t7 .- d_t2t7_min, expdist2)) >= α
 @test pvalue(HypothesisTests.OneSampleADTest(d_t2t5 .- d_t2t5_min, expdist2)) >= α
 @test pvalue(HypothesisTests.OneSampleADTest(d_t5t7 .- d_t5t7_min, expdist2)) >= α
+
+# on a tree with #generations + Ne dictionary
+net = PN.readTopology("(A:1000,B:1000);")
+Ne = Dict(1=>20, 2=>300, 3=>300)
+Random.seed!(639)
+genetree = PCS.simulatecoalescent(net, 1, 2, Ne)[1]
+@test all(sort!([e.length for e in genetree.edge]) .> [1,1, 15,15, 800,800])
 end
