@@ -1,7 +1,7 @@
 ```@setup getting_started
 using PhyloNetworks, PhyloCoalSimulations, RCall
-mkpath("../assets/figures")
-figname(x) = joinpath("..", "assets", "figures", x)
+figpath = joinpath("..", "assets", "figures"); mkpath(figpath)
+figname(x) = joinpath(figpath, x)
 using Random; Random.seed!(432)
 ```
 
@@ -42,9 +42,9 @@ net = readTopology("((C:0.9,(B:0.2)#H1:0.7::0.6):0.6,(#H1:0.6,A:1):0.5);");
 using PhyloPlots
 R"svg"(figname("net3taxa.svg"), width=6, height=3); # hide
 R"par"(mar=[.1,.1,.1,.1]); R"layout"([1 2]); # hide
-plot(net, :R, showEdgeNumber=true, showIntNodeLabel=true, showGamma=true, tipOffset=0.1);
-R"mtext"("in black: edge numbers", side=1, line=-1);  # hide
-plot(net, :R, showEdgeLength=true, useEdgeLength=true, tipOffset=0.1);
+plot(net, showedgenumber=true, shownodelabel=true, showgamma=true, tipoffset=0.1);
+R"mtext"("in grey: edge numbers", side=1, line=-1);  # hide
+plot(net, showedgelength=true, useedgelength=true, tipoffset=0.1);
 R"mtext"("in black: edge lengths", side=1, line=-1);  # hide
 R"dev.off()" # hide
 nothing # hide
@@ -96,9 +96,9 @@ R"par"(mar=[.1,.1,.1,.1]); R"layout"([1 2]); # hide
 using DataFrames
 for i in 1:2
   gt = trees[i]
-  plot(gt, :R, tipOffset=0.1,
-               edgeLabel=DataFrame(number = [e.number  for e in gt.edge],
-                                   label  = [e.inCycle for e in gt.edge]));
+  plot(gt, tipoffset=0.1,
+           edgelabel=DataFrame(number = [e.number  for e in gt.edge],
+                               label  = [e.inCycle for e in gt.edge]));
   R"mtext"("gene $i", line=-1) # hide
 end
 R"mtext"("numbers: network edge each gene lineage maps to, at time of coalescence.\n8 = number of edge above the network root", side=1, line=-1, outer=true);  # hide

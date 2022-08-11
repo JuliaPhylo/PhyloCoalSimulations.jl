@@ -1,6 +1,7 @@
 ```@setup mapping
 using PhyloNetworks, PhyloPlots, PhyloCoalSimulations, RCall, DataFrames
-figname(x) = joinpath("..", "assets", "figures", x)
+figpath = joinpath("..", "assets", "figures"); mkpath(figpath)
+figname(x) = joinpath(figpath, x)
 ```
 # mapping gene trees into the species phylogeny
 
@@ -50,12 +51,12 @@ The network is shown on the left below, with edges annotated by their numbers.
 ```@example mapping
 R"svg"(figname("genetree_example1.svg"), width=7.5, height=3); # hide
 R"par"(mar=[.1,.2,.1,.2], oma=[0,0,0,0.8]); R"layout"([1 2]); # hide
-plot(net, :R, showEdgeNumber=true, showIntNodeLabel=true, tipOffset=0.1);
+plot(net, showedgenumber=true, shownodelabel=true, tipoffset=0.1);
 R"mtext"("species network", side=3, line=-1);  # hide
 R"mtext"("grey: population edge number", side=1, line=-1, cex=0.9);  # hide
-plot(tree, :R, edgeLabel=DataFrame(number=[e.number for e in tree.edge],
-                                   label=[e.inCycle for e in tree.edge]),
-               showIntNodeLabel=true, tipOffset=0.1);
+plot(tree, edgelabel=DataFrame(number=[e.number for e in tree.edge],
+                               label=[e.inCycle for e in tree.edge]),
+           edgelabelcolor="red4", shownodelabel=true, tipoffset=0.1);
 R"mtext"("gene tree", side=3, line=-1);  # hide
 R"mtext"("red (edge inCycle value): population a gene edge maps into", side=1, line=-2, cex=0.9); # hide
 R"mtext"("black (node names): speciation/reticulation a node maps to", side=1, line=-1, cex=0.9); # hide

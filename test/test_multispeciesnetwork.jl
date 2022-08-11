@@ -77,7 +77,7 @@ Random.seed!(1602)
 genetrees = PCS.simulatecoalescent(net, nsim, 1)
 α = 0.05 # to test "approximately" correct results
 #= expected CF:
-plot(net, :R, showEdgeNumber=true, showGamma=true);
+plot(net, showedgenumber=true, showgamma=true);
 t2,t7 sister after cut edge 6, t8 only descendant of either hybrid node, so:
 expCFminor = exp(-net.edge[4].length) * ((0.6 + 0.4*0.3)*exp(-net.edge[7].length) + 0.4*0.7)/3
 =#

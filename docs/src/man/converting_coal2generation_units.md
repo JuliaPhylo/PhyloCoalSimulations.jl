@@ -1,5 +1,7 @@
 ```@setup converting
-using PhyloNetworks, PhyloCoalSimulations
+using PhyloNetworks, PhyloPlots, PhyloCoalSimulations
+figpath = joinpath("..", "assets", "figures"); mkpath(figpath)
+figname(x) = joinpath(figpath, x)
 net = readTopology("((C:0.9,(B:0.2)#H1:0.7::0.6)I1:0.6,(#H1:0.6::0.4,A:1.0)I2:0.5)I3;");
 ```
 
@@ -61,12 +63,12 @@ we need the effective size of each population. If the population
 size is constant, then `g` generations correspond to `u = g/Nₑ`
 coalescent units. If the population size varies along a single population edge,
 then the coalescence rate on that edge is determined by the geometric mean
-``\widebar{N_e}`` of the population size:
-``u = \int_0^g 1/N_e(t) dt = g/\widebar{N_e}``.
+``\overline{N_e}`` of the population size:
+``u = \int_0^g 1/N_e(t) dt = g/\overline{N_e}``.
 
 Let's assume we have a network with number of generations as edge lengths:
 ```@repl converting
-net_gen = readTopology("((C:900,(B:200)#H1:0.7::600)I1:600,(#H1:0.6::400,A:1000)I2:500)I3;");
+net_gen = readTopology("((C:900,(B:200)#H1:700::0.6)I1:600,(#H1:600::0.4,A:1000)I2:500)I3;");
 ```
 and that we have a dictionary listing the (geometric mean) population
 size along each edge of the species network, and also along the root edge
@@ -81,6 +83,25 @@ rootedgenumber = PhyloCoalSimulations.get_rootedgenumber(net_gen)
 push!(Ne, rootedgenumber => Ne_distribution()); # Nₑ above the root
 Ne
 ```
+
+To visually check that we built our Nₑ dictionary correctly
+(and that our edge lengths are in generations, as we think),
+we can do this:
+
+```@example converting
+using DataFrames, RCall
+R"svg"(figname("net_genNe.svg"), width=3.5, height=3); # hide
+R"par"(mar=[.5,1,.0,.1]);  # hide
+plot(net_gen, tipoffset=0.1, showedgelength=true, edgelabelcolor="red4",
+          edgelabel=DataFrame(n=[e.number for e in net_gen.edge],
+                              l=[Ne[e.number] for e in net_gen.edge]));
+R"text"(x=1, y=2.5, Ne[rootedgenumber], adj=1, col="red4");
+R"mtext"("red: Ne values", side=1, line=-1.5, col="red4");
+R"mtext"("black: edge lengths", side=1, line=-0.5);
+R"dev.off()" # hide
+nothing # hide
+```
+![species net with Ne](../assets/figures/net_genNe.svg)
 
 To simulate gene trees with edge lengths in generations, we can use a
 convenience wrapper function that takes **Nₑ as an extra input** to:
