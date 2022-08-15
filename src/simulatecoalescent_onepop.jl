@@ -59,6 +59,7 @@ function simulatecoal_onepopulation!(lineagelist::AbstractVector,
     poplen > 0.0 || return(nextid)
     # at this point: the list has 1 or more lineages
     nlineage = length(lineagelist)
+    poplen < Inf || nlineage > 1 || return(nextid)
     timeleft = poplen
     while true
         if nlineage == 1 # then no one can coalesce
