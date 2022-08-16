@@ -217,12 +217,11 @@ function map2population!(forest, pop_node, populationid, number)
         degree2node = PN.Node(number, false) # false because tree node (not hybrid)
         # keep default inCycle = -1, because maps to population node, not population edge
         degree2node.name = popnodename
-        # john: how do we know that the edges here are correctly directed?
         push!(e_old.node, degree2node) # isChild1 true by default
         push!(degree2node.edge, e_old)
         e_new = PN.Edge(number, 0.0)   # length 0.0
         e_new.inCycle = populationid
-        push!(e_new.node, degree2node)
+        push!(e_new.node, degree2node) # isChild1 true by default
         push!(degree2node.edge, e_new)
         forest[i] = e_new
         number += 1
