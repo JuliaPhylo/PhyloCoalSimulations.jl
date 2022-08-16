@@ -121,7 +121,7 @@ The leaf name is made by concatenating `species`, `delim` and `individual`.
 """
 function initializetip(species::AbstractString, individual::AbstractString,
                        number::Integer, delim=""::AbstractString,
-                       len=0.0::AbstractFloat, populationid::Integer)
+                       len=0.0::AbstractFloat, populationid=-1)
     tipnode = PN.Node(number,false)
     tipnode.leaf = true
     tipnode.name = species * delim * individual
