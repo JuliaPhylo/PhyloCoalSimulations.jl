@@ -99,7 +99,6 @@ Both `n.inCycle` and `e.inCycle` are set to `populationid`.
 function coalescence_edge(e1,e2,number,populationid)
     parentnode = PN.Node(number, false) # false because tree node (not hybrid)
     parentnode.inCycle = populationid
-    # john: are the edge/node relationships below supposed to be directed in any way?
     push!(e1.node, parentnode) # isChild1 true by default
     push!(e2.node, parentnode)
     push!(parentnode.edge, e1)
@@ -127,9 +126,9 @@ function initializetip(species::AbstractString, individual::AbstractString,
     tipnode.leaf = true
     tipnode.name = species * delim * individual
     tipedge = PN.Edge(number, len)
+    tipedge.inCycle = populationid
     push!(tipedge.node, tipnode)
     push!(tipnode.edge, tipedge)
-    tipedge.inCycle = populationid
     return tipedge
 end
 
