@@ -149,6 +149,7 @@ function initializetip(speciesnode::PN.Node, nindividuals::Integer,
     sname = speciesnode.name
     speciesnode.leaf || error("initializing at a non-leaf node?")
     sname != "" || error("empty name: initializing at a non-leaf node?")
+    speciesparentedgenum = speciesnode.edge[1].number
     forest = PN.Edge[]
     if isnothing(delim)
         delim = (nindividuals == 1 ? "" : "_")
@@ -156,6 +157,7 @@ function initializetip(speciesnode::PN.Node, nindividuals::Integer,
     iname(x) = (nindividuals == 1 ? "" : string(x))
     for i in 1:nindividuals
         push!(forest, initializetip(sname, iname(i), number, delim, len))
+        forest[i].inCycle = speciesparentedgenum
         number += 1
     end
     return forest

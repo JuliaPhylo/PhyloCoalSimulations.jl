@@ -173,10 +173,6 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci, nindividuals=1;
             if nn.leaf
                 ee = parentedgelist[1]
                 f = initializetip(nn, nindividuals[nn.name], nextid)
-                # john: could the inCycle be set inside initializetip?
-                for e in f
-                    e.inCycle = ee.number
-                end
                 nextid += nindividuals[nn.name]
                 edge2forest[ee.number] = f
                 nextid = simulatecoal_onepopulation!(f, ee.length, nextid, ee.number)
