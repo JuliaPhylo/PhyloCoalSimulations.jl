@@ -122,13 +122,14 @@ The leaf name is made by concatenating `species`, `delim` and `individual`.
 """
 function initializetip(species::AbstractString, individual::AbstractString,
                        number::Integer, delim=""::AbstractString,
-                       len=0.0::AbstractFloat)
+                       len=0.0::AbstractFloat, populationid::Integer)
     tipnode = PN.Node(number,false)
     tipnode.leaf = true
     tipnode.name = species * delim * individual
     tipedge = PN.Edge(number, len)
     push!(tipedge.node, tipnode)
     push!(tipnode.edge, tipedge)
+    tipedge.inCycle = populationid
     return tipedge
 end
 
@@ -141,7 +142,9 @@ and numbered with consecutive number IDs starting at `number`.
 If nindividuals is 1, then the leaf name is simply the species name.
 Otherwise, then the leaf names include the individual number and
 the default delimiter is `_`. For example, if the species name is `s`
-then leaf names are: `s_1`, `s_2`, etc. by default.
+then leaf names are: `s_1`, `s_2`, etc. by default.  Pendant leaf
+edges have inCycle set to the number of the corresponding edge
+in the species network.
 """
 function initializetip(speciesnode::PN.Node, nindividuals::Integer,
                        number::Integer, delim=nothing,
@@ -149,15 +152,14 @@ function initializetip(speciesnode::PN.Node, nindividuals::Integer,
     sname = speciesnode.name
     speciesnode.leaf || error("initializing at a non-leaf node?")
     sname != "" || error("empty name: initializing at a non-leaf node?")
-    speciesparentedgenum = speciesnode.edge[1].number
+    populationid = speciesnode.edge[1].number
     forest = PN.Edge[]
     if isnothing(delim)
         delim = (nindividuals == 1 ? "" : "_")
     end
     iname(x) = (nindividuals == 1 ? "" : string(x))
     for i in 1:nindividuals
-        push!(forest, initializetip(sname, iname(i), number, delim, len))
-        forest[i].inCycle = speciesparentedgenum
+        push!(forest, initializetip(sname, iname(i), number, delim, len, populationid))
         number += 1
     end
     return forest
