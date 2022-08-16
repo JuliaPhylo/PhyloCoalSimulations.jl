@@ -1,6 +1,7 @@
 name = "PhyloCoalSimulations"
 uuid = "53f7b83a-06b5-4910-9a21-1896bf762ade"
-authors = ["Cecile Ane <cecileane@users.noreply.github.com> and contributors"]
+authors = ["Cecile Ane <cecileane@users.noreply.github.com>",
+           "John Fogg <70609062+fogg-uw@users.noreply.github.com>"]
 version = "0.1.0"
 
 [deps]
