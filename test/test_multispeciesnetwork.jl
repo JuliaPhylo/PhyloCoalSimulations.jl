@@ -122,9 +122,9 @@ Random.seed!(639)
 genetree = PCS.simulatecoalescent(net, 1, 2, Ne)[1]
 @test all(sort!([e.length for e in genetree.edge]) .> [1,1, 15,15, 800,800])
 # modify the tree to have same population size on all branches
-Ne = 300
+Ne = 20
 genetree = PCS.simulatecoalescent(net, 1, 2, Ne)[1]
-@test all(sort!([e.length for e in genetree.edge]) .> [15,15, 15,15, 800,800])
+@test all(sort!([e.length for e in genetree.edge]) .> [1,1, 1,1, 800,800])
 
 # test edge cases (like incorrect input)
 # (because i am hungry for 100% code coverage)
