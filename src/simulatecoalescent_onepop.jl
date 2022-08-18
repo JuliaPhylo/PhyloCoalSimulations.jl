@@ -59,8 +59,7 @@ function simulatecoal_onepopulation!(lineagelist::AbstractVector,
     poplen > 0.0 || return(nextid)
     # at this point: the list has 1 or more lineages
     nlineage = length(lineagelist)
-    poplen < Inf || nlineage > 1 ||
-        error("there should be 2 or more lineages at the start of the infinite root population")
+    poplen < Inf || nlineage > 1 || return(nextid)
     timeleft = poplen
     while true
         if nlineage == 1 # then no one can coalesce
@@ -122,11 +121,12 @@ The leaf name is made by concatenating `species`, `delim` and `individual`.
 """
 function initializetip(species::AbstractString, individual::AbstractString,
                        number::Integer, delim=""::AbstractString,
-                       len=0.0::AbstractFloat)
+                       len=0.0::AbstractFloat, populationid=-1)
     tipnode = PN.Node(number,false)
     tipnode.leaf = true
     tipnode.name = species * delim * individual
     tipedge = PN.Edge(number, len)
+    tipedge.inCycle = populationid
     push!(tipedge.node, tipnode)
     push!(tipnode.edge, tipedge)
     return tipedge
@@ -141,20 +141,24 @@ and numbered with consecutive number IDs starting at `number`.
 If nindividuals is 1, then the leaf name is simply the species name.
 Otherwise, then the leaf names include the individual number and
 the default delimiter is `_`. For example, if the species name is `s`
-then leaf names are: `s_1`, `s_2`, etc. by default.
+then leaf names are: `s_1`, `s_2`, etc. by default.  Pendant leaf
+edges have inCycle set to the number of the corresponding edge
+in the species network.
 """
 function initializetip(speciesnode::PN.Node, nindividuals::Integer,
                        number::Integer, delim=nothing,
                        len=0.0::AbstractFloat)
     sname = speciesnode.name
+    speciesnode.leaf || error("initializing at a non-leaf node?")
     sname != "" || error("empty name: initializing at a non-leaf node?")
+    populationid = speciesnode.edge[1].number
     forest = PN.Edge[]
     if isnothing(delim)
         delim = (nindividuals == 1 ? "" : "_")
     end
     iname(x) = (nindividuals == 1 ? "" : string(x))
     for i in 1:nindividuals
-        push!(forest, initializetip(sname, iname(i), number, delim, len))
+        push!(forest, initializetip(sname, iname(i), number, delim, len, populationid))
         number += 1
     end
     return forest
@@ -217,7 +221,7 @@ function map2population!(forest, pop_node, populationid, number)
         push!(degree2node.edge, e_old)
         e_new = PN.Edge(number, 0.0)   # length 0.0
         e_new.inCycle = populationid
-        push!(e_new.node, degree2node)
+        push!(e_new.node, degree2node) # isChild1 true by default
         push!(degree2node.edge, e_new)
         forest[i] = e_new
         number += 1
@@ -262,13 +266,13 @@ function convert2tree!(rootnode::PN.Node)
         @error("edge numbers are not all distinct")
     ntaxa = 0
     for nn in net.node # collect leaf names and # of leaves
+        nn.name == "" || push!(net.names, nn.name)
         nn.leaf == (length(nn.edge)==1) ||
             error("incorrect .leaf for node number $nn")
         nn.leaf || continue
         ntaxa += 1
         nn.name != "" || error("leaf without name")
         push!(net.leaf,  nn)
-        push!(net.names, nn.name)
     end
     net.numTaxa = ntaxa
     return net
