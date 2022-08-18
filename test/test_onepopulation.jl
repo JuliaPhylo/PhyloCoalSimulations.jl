@@ -26,7 +26,7 @@ f1 = [e1,e2]
 @test length(f1) == 1
 net = PCS.convert2tree!(f1[1].node[1])
 testgenetree = (VERSION < v"1.6"  ?   "(s1:0.6,s2:0.7);" : # for julia v1.5
-    ( v"1.7" <= VERSION < v"1.8-" ? "(s2:1.1,s1:1.0);" :   # for julia v1.7
+    ( v"1.7" <= VERSION < v"1.9-" ? "(s2:1.1,s1:1.0);" :   # for julia v1.7 or v1.8
     "random genetree depends on RNG")) # for later
 @test PN.writeTopology(net, round=true, digits=1) == testgenetree
 
