@@ -121,4 +121,22 @@ Ne = Dict(1=>20, 2=>300, 3=>300)
 Random.seed!(639)
 genetree = PCS.simulatecoalescent(net, 1, 2, Ne)[1]
 @test all(sort!([e.length for e in genetree.edge]) .> [1,1, 15,15, 800,800])
+# modify the tree to have same population size on all branches
+Ne = 300
+genetree = PCS.simulatecoalescent(net, 1, 2, Ne)[1]
+@test all(sort!([e.length for e in genetree.edge]) .> [15,15, 15,15, 800,800])
+
+# test edge cases (like incorrect input)
+# (because i am hungry for 100% code coverage)
+
+nindividuals = "this is neither an integer nor a dict of integers"
+bad_call() = PCS.simulatecoalescent(net, 1, nindividuals)
+message = "nindividuals should be an integer or dictionary of integers"
+@test_throws ErrorException(message) bad_call()
+
+Ne = "this is neither a number nor a dictionary"
+bad_call() = PCS.simulatecoalescent(net, 1, 2, Ne)
+message = "populationsize should be a number or dictionary"
+@test_throws ErrorException(message) bad_call()
+
 end
