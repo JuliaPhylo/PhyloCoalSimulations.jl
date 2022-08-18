@@ -70,7 +70,7 @@ Let's assume we have a network with number of generations as edge lengths:
 ```@repl converting
 net_gen = readTopology("((C:900,(B:200)#H1:700::0.6)I1:600,(#H1:600::0.4,A:1000)I2:500)I3;");
 ```
-and that we have a dictionary listing the (geometric mean) population
+and that we have a dictionary listing the (harmonic mean) population
 size along each edge of the species network, and also along the root edge
 above the network. Below, we simulate a population size for each population,
 from a uniform distribution between 1,000 and 1,500.
