@@ -62,7 +62,7 @@ then we need extra information to simulate under the coalescent:
 we need the effective size of each population. If the population
 size is constant, then `g` generations correspond to `u = g/Nₑ`
 coalescent units. If the population size varies along a single population edge,
-then the coalescence rate on that edge is determined by the geometric mean
+then the coalescence rate on that edge is determined by the harmonic mean
 ``\overline{N_e}`` of the population size:
 ``u = \int_0^g 1/N_e(t) dt = g/\overline{N_e}``.
 
