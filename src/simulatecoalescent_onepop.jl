@@ -97,16 +97,17 @@ above the parent node, of length 0 and numbered `number`.
 Both `n.inCycle` and `e.inCycle` are set to `populationid`.
 """
 function coalescence_edge(e1,e2,number,populationid)
-    parentnode = PN.Node(number, false) # false because tree node (not hybrid)
-    parentnode.inCycle = populationid
-    push!(e1.node, parentnode) # isChild1 true by default
+    parentnode = PN.Node(number, false, false, -1.0, [e1,e2],
+                false,false,false,false,false,false, populationid, # inCycle
+                nothing,-1,-1,"")
+    push!(e1.node, parentnode) # isChild1 was true
     push!(e2.node, parentnode)
-    push!(parentnode.edge, e1)
-    push!(parentnode.edge, e2)
 
-    parentedge = PN.Edge(number, 0.0)   # length 0.0
-    parentedge.inCycle = populationid
-    push!(parentedge.node, parentnode)
+    parentedge = PN.Edge(number, 0.0,  # length
+                false, -1.0,-1.0, 1.0, # y,z,gamma
+                [parentnode],true,     # isChild1
+                true,populationid,     # inCycle
+                true,true,false)
     push!(parentnode.edge, parentedge)
     return parentedge
 end
@@ -122,12 +123,14 @@ The leaf name is made by concatenating `species`, `delim` and `individual`.
 function initializetip(species::AbstractString, individual::AbstractString,
                        number::Integer, delim=""::AbstractString,
                        len=0.0::AbstractFloat, populationid=-1)
-    tipnode = PN.Node(number,false)
-    tipnode.leaf = true
-    tipnode.name = species * delim * individual
-    tipedge = PN.Edge(number, len)
-    tipedge.inCycle = populationid
-    push!(tipedge.node, tipnode)
+    tipname = species * delim * individual
+    tipnode = PN.Node(number,true, false, -1.0, PN.Edge[],
+                false,false,false,false,false,false, -1, # inCycle
+                nothing,-1,-1, tipname)
+    tipedge = PN.Edge(number, len, false, -1.0,-1.0, 1.0, # y,z,gamma
+                [tipnode],true,     # isChild1
+                true,populationid,  # inCycle
+                true,true,false)
     push!(tipnode.edge, tipedge)
     return tipedge
 end
@@ -214,14 +217,15 @@ function map2population!(forest, pop_node, populationid, number)
                                          pop_node.name)
     for i in eachindex(forest)
         e_old = forest[i]
-        degree2node = PN.Node(number, false) # false because tree node (not hybrid)
-        # keep default inCycle = -1, because maps to population node, not population edge
-        degree2node.name = popnodename
-        push!(e_old.node, degree2node) # isChild1 true by default
-        push!(degree2node.edge, e_old)
-        e_new = PN.Edge(number, 0.0)   # length 0.0
-        e_new.inCycle = populationid
-        push!(e_new.node, degree2node) # isChild1 true by default
+        degree2node = PN.Node(number, false, false, -1.0, [e_old],
+                false,false,false,false,false,false, -1, # inCycle = -1: maps to population node, not population edgee
+                nothing,-1,-1, popnodename)
+        push!(e_old.node, degree2node) # isChild1 was set to true
+        e_new = PN.Edge(number, 0.0,   # length 0.0
+                false, -1.0,-1.0, 1.0, # y,z,gamma
+                [degree2node],true,    # isChild1
+                true,populationid,     # inCycle
+                true,true,false)
         push!(degree2node.edge, e_new)
         forest[i] = e_new
         number += 1

@@ -10,5 +10,5 @@ PhyloNetworks = "33ad39ac-ed31-50eb-9b15-43d0656eaa72"
 
 [compat]
 Distributions = "0.25"
-PhyloNetworks = "0.15.1"
+PhyloNetworks = "0.15.3"
 julia = "1.5"
