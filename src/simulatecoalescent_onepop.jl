@@ -24,20 +24,20 @@ in the species phylogeny.
 julia> PhyloCoalSimulations.simulatecoal_onepopulation!([], 2.0, 1)
 1
 
-julia> e1 = PhyloCoalSimulations.initializetip("s","1",1,"",0.1);
+julia> e1 = PhyloCoalSimulations.initializetip("s","1",1,"");
 
-julia> e2 = PhyloCoalSimulations.initializetip("s","2",2,"",0.2);
+julia> e2 = PhyloCoalSimulations.initializetip("s","2",2,"");
 
 julia> forest = [e1,e2]
 2-element Vector{PhyloNetworks.Edge}:
  PhyloNetworks.Edge:
  number:1
- length:0.1
+ length:0.0
  attached to 1 node(s) (parent first): 1
 
  PhyloNetworks.Edge:
  number:2
- length:0.2
+ length:0.0
  attached to 1 node(s) (parent first): 2
 
 julia> using Random; Random.seed!(7690);
@@ -114,20 +114,20 @@ end
 
 """
     initializetip(species::AbstractString, individual::AbstractString,
-                  number::Integer, delim=""::AbstractString, len=0.0)
+                  number::Integer, delim=""::AbstractString)
 
-Create a leaf node and a pendant edge of length `len`, incident to each other,
+Create a leaf node and a pendant edge of length 0, incident to each other,
 both numbered `number`. Return the pendant edge.
 The leaf name is made by concatenating `species`, `delim` and `individual`.
 """
 function initializetip(species::AbstractString, individual::AbstractString,
                        number::Integer, delim=""::AbstractString,
-                       len=0.0::AbstractFloat, populationid=-1)
+                       populationid=-1)
     tipname = species * delim * individual
     tipnode = PN.Node(number,true, false, -1.0, PN.Edge[],
                 false,false,false,false,false,false, -1, # inCycle
                 nothing,-1,-1, tipname)
-    tipedge = PN.Edge(number, len, false, -1.0,-1.0, 1.0, # y,z,gamma
+    tipedge = PN.Edge(number, 0.0, false, -1.0,-1.0, 1.0, # y,z,gamma
                 [tipnode],true,     # isChild1
                 true,populationid,  # inCycle
                 true,true,false)
@@ -136,8 +136,8 @@ function initializetip(species::AbstractString, individual::AbstractString,
 end
 
 """
-    initializetip(speciesnode::Node, nindividuals::Integer,
-                  number::Integer, delim, len=0.0)
+    initializetipforest(speciesnode::Node, nindividuals::Integer,
+                  number::Integer, delim)
 
 Vector of pendant leaf edges, with leaves named after `speciesnode`,
 and numbered with consecutive number IDs starting at `number`.
@@ -148,20 +148,19 @@ then leaf names are: `s_1`, `s_2`, etc. by default.  Pendant leaf
 edges have inCycle set to the number of the corresponding edge
 in the species network.
 """
-function initializetip(speciesnode::PN.Node, nindividuals::Integer,
-                       number::Integer, delim=nothing,
-                       len=0.0::AbstractFloat)
+function initializetipforest(speciesnode::PN.Node, nindividuals::Integer,
+                       number::Integer, delim=nothing)
     sname = speciesnode.name
     speciesnode.leaf || error("initializing at a non-leaf node?")
     sname != "" || error("empty name: initializing at a non-leaf node?")
     populationid = speciesnode.edge[1].number
-    forest = PN.Edge[]
+    forest = Vector{PN.Edge}(undef,nindividuals)
     if isnothing(delim)
         delim = (nindividuals == 1 ? "" : "_")
     end
     iname(x) = (nindividuals == 1 ? "" : string(x))
     for i in 1:nindividuals
-        push!(forest, initializetip(sname, iname(i), number, delim, len, populationid))
+        forest[i] = initializetip(sname, iname(i), number, delim, populationid)
         number += 1
     end
     return forest
@@ -192,7 +191,7 @@ julia> using PhyloNetworks; net = readTopology("(A:1,B:1);");
 
 julia> leafA = net.node[1]; edge2A_number = net.edge[1].number;
 
-julia> f = PhyloCoalSimulations.initializetip(leafA, 2, 4); # 2 edges, numbered 4 & 5
+julia> f = PhyloCoalSimulations.initializetipforest(leafA, 2, 4); # 2 edges, numbered 4 & 5
 
 julia> PhyloCoalSimulations.map2population!(f, leafA, edge2A_number, 6)
 8

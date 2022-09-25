@@ -180,7 +180,7 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals;
             nparents = length(parentedgelist)
             if nn.leaf
                 ee = parentedgelist[1]
-                f = initializetip(nn, nindividuals[nn.name], nextid)
+                f = initializetipforest(nn, nindividuals[nn.name], nextid)
                 nextid += nindividuals[nn.name]
                 edge2forest[ee.number] = f
                 nextid = simulatecoal_onepopulation!(f, ee.length, nextid, ee.number)
