@@ -28,17 +28,7 @@ julia> e1 = PhyloCoalSimulations.initializetip("s","1",1,"");
 
 julia> e2 = PhyloCoalSimulations.initializetip("s","2",2,"");
 
-julia> forest = [e1,e2]
-2-element Vector{PhyloNetworks.Edge}:
- PhyloNetworks.Edge:
- number:1
- length:0.0
- attached to 1 node(s) (parent first): 1
-
- PhyloNetworks.Edge:
- number:2
- length:0.0
- attached to 1 node(s) (parent first): 2
+julia> forest = [e1,e2];
 
 julia> using Random; Random.seed!(7690);
 
@@ -49,7 +39,7 @@ PhyloNetworks.HybridNetwork, Rooted Network
 2 edges
 3 nodes: 2 tips, 0 hybrid nodes, 1 internal tree nodes.
 tip labels: s2, s1
-(s2:0.502,s1:0.402);
+(s2:0.302,s1:0.302);
 
 ```
 """
@@ -200,7 +190,7 @@ julia> length(f)
 2
 
 julia> f[2]
-PhyloNetworks.Edge:
+PhyloNetworks.EdgeT{PhyloNetworks.Node}:
  number:7
  length:0.0
  attached to 1 node(s) (parent first): 7
