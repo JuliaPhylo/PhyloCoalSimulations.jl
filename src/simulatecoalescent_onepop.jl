@@ -24,21 +24,11 @@ in the species phylogeny.
 julia> PhyloCoalSimulations.simulatecoal_onepopulation!([], 2.0, 1)
 1
 
-julia> e1 = PhyloCoalSimulations.initializetip("s","1",1,"",0.1);
+julia> e1 = PhyloCoalSimulations.initializetip("s","1",1,"");
 
-julia> e2 = PhyloCoalSimulations.initializetip("s","2",2,"",0.2);
+julia> e2 = PhyloCoalSimulations.initializetip("s","2",2,"");
 
-julia> forest = [e1,e2]
-2-element Vector{PhyloNetworks.Edge}:
- PhyloNetworks.Edge:
- number:1
- length:0.1
- attached to 1 node(s) (parent first): 1
-
- PhyloNetworks.Edge:
- number:2
- length:0.2
- attached to 1 node(s) (parent first): 2
+julia> forest = [e1,e2];
 
 julia> using Random; Random.seed!(7690);
 
@@ -49,7 +39,7 @@ PhyloNetworks.HybridNetwork, Rooted Network
 2 edges
 3 nodes: 2 tips, 0 hybrid nodes, 1 internal tree nodes.
 tip labels: s2, s1
-(s2:0.502,s1:0.402);
+(s2:0.302,s1:0.302);
 
 ```
 """
@@ -97,44 +87,47 @@ above the parent node, of length 0 and numbered `number`.
 Both `n.inCycle` and `e.inCycle` are set to `populationid`.
 """
 function coalescence_edge(e1,e2,number,populationid)
-    parentnode = PN.Node(number, false) # false because tree node (not hybrid)
-    parentnode.inCycle = populationid
-    push!(e1.node, parentnode) # isChild1 true by default
+    parentnode = PN.Node(number, false, false, -1.0, [e1,e2],
+                false,false,false,false,false,false, populationid, # inCycle
+                nothing,-1,-1,"")
+    push!(e1.node, parentnode) # isChild1 was true
     push!(e2.node, parentnode)
-    push!(parentnode.edge, e1)
-    push!(parentnode.edge, e2)
 
-    parentedge = PN.Edge(number, 0.0)   # length 0.0
-    parentedge.inCycle = populationid
-    push!(parentedge.node, parentnode)
+    parentedge = PN.Edge(number, 0.0,  # length
+                false, -1.0,-1.0, 1.0, # y,z,gamma
+                [parentnode],true,     # isChild1
+                true,populationid,     # inCycle
+                true,true,false)
     push!(parentnode.edge, parentedge)
     return parentedge
 end
 
 """
     initializetip(species::AbstractString, individual::AbstractString,
-                  number::Integer, delim=""::AbstractString, len=0.0)
+                  number::Integer, delim=""::AbstractString)
 
-Create a leaf node and a pendant edge of length `len`, incident to each other,
+Create a leaf node and a pendant edge of length 0, incident to each other,
 both numbered `number`. Return the pendant edge.
 The leaf name is made by concatenating `species`, `delim` and `individual`.
 """
 function initializetip(species::AbstractString, individual::AbstractString,
                        number::Integer, delim=""::AbstractString,
-                       len=0.0::AbstractFloat, populationid=-1)
-    tipnode = PN.Node(number,false)
-    tipnode.leaf = true
-    tipnode.name = species * delim * individual
-    tipedge = PN.Edge(number, len)
-    tipedge.inCycle = populationid
-    push!(tipedge.node, tipnode)
+                       populationid=-1)
+    tipname = species * delim * individual
+    tipnode = PN.Node(number,true, false, -1.0, PN.Edge[],
+                false,false,false,false,false,false, -1, # inCycle
+                nothing,-1,-1, tipname)
+    tipedge = PN.Edge(number, 0.0, false, -1.0,-1.0, 1.0, # y,z,gamma
+                [tipnode],true,     # isChild1
+                true,populationid,  # inCycle
+                true,true,false)
     push!(tipnode.edge, tipedge)
     return tipedge
 end
 
 """
-    initializetip(speciesnode::Node, nindividuals::Integer,
-                  number::Integer, delim, len=0.0)
+    initializetipforest(speciesnode::Node, nindividuals::Integer,
+                  number::Integer, delim)
 
 Vector of pendant leaf edges, with leaves named after `speciesnode`,
 and numbered with consecutive number IDs starting at `number`.
@@ -145,20 +138,19 @@ then leaf names are: `s_1`, `s_2`, etc. by default.  Pendant leaf
 edges have inCycle set to the number of the corresponding edge
 in the species network.
 """
-function initializetip(speciesnode::PN.Node, nindividuals::Integer,
-                       number::Integer, delim=nothing,
-                       len=0.0::AbstractFloat)
+function initializetipforest(speciesnode::PN.Node, nindividuals::Integer,
+                       number::Integer, delim=nothing)
     sname = speciesnode.name
     speciesnode.leaf || error("initializing at a non-leaf node?")
     sname != "" || error("empty name: initializing at a non-leaf node?")
     populationid = speciesnode.edge[1].number
-    forest = PN.Edge[]
+    forest = Vector{PN.Edge}(undef,nindividuals)
     if isnothing(delim)
         delim = (nindividuals == 1 ? "" : "_")
     end
     iname(x) = (nindividuals == 1 ? "" : string(x))
     for i in 1:nindividuals
-        push!(forest, initializetip(sname, iname(i), number, delim, len, populationid))
+        forest[i] = initializetip(sname, iname(i), number, delim, populationid)
         number += 1
     end
     return forest
@@ -189,7 +181,7 @@ julia> using PhyloNetworks; net = readTopology("(A:1,B:1);");
 
 julia> leafA = net.node[1]; edge2A_number = net.edge[1].number;
 
-julia> f = PhyloCoalSimulations.initializetip(leafA, 2, 4); # 2 edges, numbered 4 & 5
+julia> f = PhyloCoalSimulations.initializetipforest(leafA, 2, 4); # 2 edges, numbered 4 & 5
 
 julia> PhyloCoalSimulations.map2population!(f, leafA, edge2A_number, 6)
 8
@@ -198,7 +190,7 @@ julia> length(f)
 2
 
 julia> f[2]
-PhyloNetworks.Edge:
+PhyloNetworks.EdgeT{PhyloNetworks.Node}:
  number:7
  length:0.0
  attached to 1 node(s) (parent first): 7
@@ -214,14 +206,15 @@ function map2population!(forest, pop_node, populationid, number)
                                          pop_node.name)
     for i in eachindex(forest)
         e_old = forest[i]
-        degree2node = PN.Node(number, false) # false because tree node (not hybrid)
-        # keep default inCycle = -1, because maps to population node, not population edge
-        degree2node.name = popnodename
-        push!(e_old.node, degree2node) # isChild1 true by default
-        push!(degree2node.edge, e_old)
-        e_new = PN.Edge(number, 0.0)   # length 0.0
-        e_new.inCycle = populationid
-        push!(e_new.node, degree2node) # isChild1 true by default
+        degree2node = PN.Node(number, false, false, -1.0, [e_old],
+                false,false,false,false,false,false, -1, # inCycle = -1: maps to population node, not population edgee
+                nothing,-1,-1, popnodename)
+        push!(e_old.node, degree2node) # isChild1 was set to true
+        e_new = PN.Edge(number, 0.0,   # length 0.0
+                false, -1.0,-1.0, 1.0, # y,z,gamma
+                [degree2node],true,    # isChild1
+                true,populationid,     # inCycle
+                true,true,false)
         push!(degree2node.edge, e_new)
         forest[i] = e_new
         number += 1
