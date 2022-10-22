@@ -242,17 +242,13 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals;
             else # nparents = 0: infinite root population
                 # f can have a single edge if a displayed tree's MRCA is strictly below the root,
                 #   or if the network root has a single child
-                @show length(f)
                 if length(f) > 1
                     if nodemapping
                         nextid = map2population!(f, nn, rootedgenumber, nextid)
                     end
                     nextid = simulatecoal_onepopulation!(f, Inf, nextid, rootedgenumber)
                 end
-                @show length(f)
-                @show length(f[1].node)
                 rootnode = f[1].node[1]
-                @show rootnode
                 genetreelist[ilocus] = convert2tree!(rootnode)
             end
         end
