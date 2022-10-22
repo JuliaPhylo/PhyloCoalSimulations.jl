@@ -159,5 +159,8 @@ Random.seed!(582)
   res = simulatecoalescent(net, 100, 2; inheritancecorrelation=rho);
   @test isapprox(sum(tips_alltogether.(res))/100,  1 - (2*0.6*0.4)*(1-rho), atol=0.1)
 end
+# in Ne, and option to not round #generations in gene tree
+Ne=0.1
+@test_logs simulatecoalescent(net, 1, 4, Ne; inheritancecorrelation=0.5, round_generationnumber=false)
 
 end

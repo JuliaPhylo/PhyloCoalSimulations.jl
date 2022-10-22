@@ -17,6 +17,7 @@ Pages = [
     "man/getting_started.md",
     "man/mapping_genetree_to_network.md",
     "man/converting_coal2generation_units.md",
+    "man/correlated_inheritance.md",
     "man/more_examples.md",
 ]
 Depth = 3

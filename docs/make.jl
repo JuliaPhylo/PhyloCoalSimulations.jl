@@ -19,6 +19,7 @@ makedocs(;
             "getting started" => "man/getting_started.md",
             "mapping gene trees into the species network" => "man/mapping_genetree_to_network.md",
             "converting between units" => "man/converting_coal2generation_units.md",
+            "correlated inheritance" => "man/correlated_inheritance.md",
             "more examples" => "man/more_examples.md",
         ],
     ],
