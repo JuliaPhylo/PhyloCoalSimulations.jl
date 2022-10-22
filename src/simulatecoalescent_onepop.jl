@@ -261,7 +261,8 @@ function convert2tree!(rootnode::PN.Node)
     for nn in net.node # collect leaf names and # of leaves
         nn.name == "" || push!(net.names, nn.name)
         nn.leaf == (length(nn.edge)==1) ||
-            error("incorrect .leaf for node number $nn")
+            nn === net.node[1] || # with node mapping, the root could have degree 1, a name, but !leaf
+            error("incorrect .leaf for node number $(nn.number)")
         nn.leaf || continue
         ntaxa += 1
         nn.name != "" || error("leaf without name")

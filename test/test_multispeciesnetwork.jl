@@ -140,3 +140,21 @@ message = "populationsize should be a number or dictionary"
 @test_throws ErrorException(message) bad_call()
 
 end
+
+
+@testset "correlated inheritance" begin
+
+net = PN.readTopology("((((a:0.01)#H1:0.21::0.6,(#H1:0.1::0.4)#H3:0.11::0.6)i1:0.2)#H2:22.4::0.6,(#H2:11.1,#H3:11.41)i2:11.3)i3;")
+# plot(net, showedgelength=true, shownodelabel=true, useedgelength=true);
+Random.seed!(1234)
+res = simulatecoalescent(net, 10, 2; inheritancecorrelation=0.99)
+@test all(all(e.length < 10 for e in t.edge) for t in res)
+Random.seed!(544)
+res = simulatecoalescent(net, 10, 2; inheritancecorrelation=0.01)
+@test sum(all(e.length < 10 for e in t.edge) for t in res) <= 5
+
+# fixit: check the correlation value
+# res = simulatecoalescent(net, 1, 5; inheritancecorrelation=0.99, nodemapping=true)[1]
+# plot(res, shownodelabel=true); # see identical mapping from the root to all tips
+
+end
