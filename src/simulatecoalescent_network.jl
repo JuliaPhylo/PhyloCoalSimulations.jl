@@ -7,7 +7,7 @@ can be used as a unique identifier of the edge above the network's root.
 get_rootedgenumber(net) = max(0, maximum(e.number for e in net.edge)) + 1
 
 """
-    simulatecoalescent(net, nloci, nindividuals; nodemapping=false)
+    simulatecoalescent(net, nloci, nindividuals; nodemapping=false, inheritancecorrelation=0.0)
 
 Simulate `nloci` gene trees with `nindividuals` from each species
 under the multispecies network coalescent, along network `net`
@@ -46,10 +46,20 @@ is carried by the `.name` attribute. Namely:
   has no name, the gene tree node is given a name built from the network node
   number.
 
+By default, lineages at a hybrid node come from a parent (chosen according
+to inheritance probabilities γ) *independently* across lineages.
+Positive dependence can be simulated with option `inheritancecorrelation`.
+For example, if this correlation is set to 1, then all lineages inherit from
+the same (randomly sampled) parent. More generally, the lineages' parents
+are simulated according to a Dirichlet process with base distribution determined
+by the γ values, and with precision parameter α = (1-r)/r, that is, r = 1/(1+α),
+where `r` is the input inheritance correlation.
+
 Assumptions:
 - `net` must have non-missing edge lengths and γ values.
 - If `nindividuals` is a dictionary, it must have a key for all species, with
   the same spelling of species names in its keys as in the tip labels of `net`.
+
 # examples
 
 ```jldoctest
@@ -258,7 +268,7 @@ end
 
 """
     simulatecoalescent(net, nloci, nindividuals, populationsize;
-        nodemapping=false, round_generationnumber=true)
+        nodemapping=false, round_generationnumber=true, inheritancecorrelation=0.0)
 
 Simulate `nloci` gene trees with `nindividuals` from each species
 under the multispecies network coalescent, along network `net`,
