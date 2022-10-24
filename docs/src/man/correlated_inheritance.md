@@ -28,12 +28,12 @@ lineages.
 
 It also has an option to simulate lineage inheritance with positive correlation.
 For this, lineages' parents are drawn according to a Dirichlet process with
-base distribution determined by the γ values, and with precision parameter
+base distribution determined by the γ values, and with concentration parameter
 α = (1-r)/r, that is, r = 1/(1+α), where r is the input inheritance correlation.
 For example, if this correlation is set to 1, then α = 0 and all lineages inherit
 from the same (randomly sampled) parent. The independence model corresponds
 to r=0 and α infinite.
-The same correlation r (or precision α) parameter is used to all hybrid nodes,
+The same correlation r (or concentration α) parameter is used at all hybrid nodes,
 but the Dirichlet process is applied independently across hybrid nodes.
 
 The effect of inheritance correlation can be seen on this species network

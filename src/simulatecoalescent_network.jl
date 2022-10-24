@@ -52,7 +52,7 @@ Positive dependence can be simulated with option `inheritancecorrelation`.
 For example, if this correlation is set to 1, then all lineages inherit from
 the same (randomly sampled) parent. More generally, the lineages' parents
 are simulated according to a Dirichlet process with base distribution determined
-by the γ values, and with precision parameter α = (1-r)/r, that is, r = 1/(1+α),
+by the γ values, and with concentration parameter α = (1-r)/r, that is, r = 1/(1+α),
 where `r` is the input inheritance correlation.
 
 Assumptions:
