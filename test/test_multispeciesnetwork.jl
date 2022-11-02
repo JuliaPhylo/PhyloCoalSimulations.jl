@@ -130,13 +130,37 @@ genetree = PCS.simulatecoalescent(net, 1, 2, Ne)[1]
 # (because i am hungry for 100% code coverage)
 
 nindividuals = "this is neither an integer nor a dict of integers"
-bad_call() = PCS.simulatecoalescent(net, 1, nindividuals)
 message = "nindividuals should be an integer or dictionary of integers"
-@test_throws ErrorException(message) bad_call()
+@test_throws ErrorException(message) PCS.simulatecoalescent(net, 1, nindividuals)
 
 Ne = "this is neither a number nor a dictionary"
-bad_call() = PCS.simulatecoalescent(net, 1, 2, Ne)
 message = "populationsize should be a number or dictionary"
-@test_throws ErrorException(message) bad_call()
+@test_throws ErrorException(message) PCS.simulatecoalescent(net, 1, 2, Ne)
+
+end
+
+
+@testset "correlated inheritance" begin
+
+net = PN.readTopology("((((a:0.01)#H1:0.21::0.6,(#H1:0.1::0.4)#H3:0.11::0.6)i1:0.2)#H2:22.4::0.6,(#H2:11.1,#H3:11.41)i2:11.3)i3;")
+# plot(net, showedgelength=true, shownodelabel=true, useedgelength=true);
+Random.seed!(1234)
+res = simulatecoalescent(net, 10, 2; inheritancecorrelation=0.99)
+@test all(all(e.length < 10 for e in t.edge) for t in res)
+Random.seed!(544)
+res = simulatecoalescent(net, 10, 2; inheritancecorrelation=0.01)
+@test sum(all(e.length < 10 for e in t.edge) for t in res) <= 5
+# res = simulatecoalescent(net, 1, 5; inheritancecorrelation=0.99, nodemapping=true)[1]
+# plot(res, shownodelabel=true); # see identical mapping from the root to all tips
+net = PN.readTopology("((t:0.0)#H1:200::0.6,#H1:200)r;")
+tips_alltogether(n) = all(e -> e.length < 100, n.edge)
+Random.seed!(582)
+@testset "correlated inheritance" for rho in [0.8,0.3,0.1]
+  res = simulatecoalescent(net, 100, 2; inheritancecorrelation=rho);
+  @test isapprox(sum(tips_alltogether.(res))/100,  1 - (2*0.6*0.4)*(1-rho), atol=0.1)
+end
+# in Ne, and option to not round #generations in gene tree
+Ne=0.1
+@test_logs simulatecoalescent(net, 1, 4, Ne; inheritancecorrelation=0.5, round_generationnumber=false)
 
 end
