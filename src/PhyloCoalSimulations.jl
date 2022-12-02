@@ -9,5 +9,6 @@ simulatecoalescent
 
 include("simulatecoalescent_onepop.jl")
 include("simulatecoalescent_network.jl")
+include("utils.jl")
 
 end

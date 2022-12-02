@@ -19,33 +19,54 @@ The number of deep coalescences can be quantified as the number of
 "extra" lineages due to incomplete lineage sorting, that can be calculated
 from embedding the gene tree into the species phylogeny
 (see [Maddison 1997](https://doi.org/10.1093/sysbio/46.3.523) for species trees).
-For a speciation node in the species tree (e.g. I1), there are extra lineages
-in the gene tree, owing to a lack of coalescence, if there are more than 2 gene
-lineages mapping to this speciation node.
-For each hybridization node (e.g. H1), there are extra lineages if there are
-more than 1 gene lineage mapping to this hybridization node
-(because there's only 1 child edge descending from a hybridization node).
+For an edge in the network, say edge 7 going from I2 to I3 going in back in time,
+lineage sorting is complete if all the gene lineages entering the edge (at I2)
+coalesce into a single gene lineage by the time they exit the edge (at I3).
+If they don't, the number of extra lineages is `k-1` where `k` is the number of
+lineages "exiting" the edge, for that particular edge in the species network
+and that particular gene tree.
+The total number of extra lineages, for a given gene tree, is the sum across
+all edges in the species phylogeny.
 
-We can count the number of extra lineages by counting the number of degree-2
-nodes in the gene tree mapping to each node in the species network, then
-counting how many are "extra".
-In our gene tree above, we can do it this way:
+In our gene tree above, we can count the number of lineages that exit each
+species edge using the degree-2 mapping nodes,
+then count how many lineages are "extra". We do so below using utilities
+[`mappingnodes`](@ref PhyloCoalSimulations.mappingnodes)
+to iterate over degree-2 mapping nodes and
+[`population_mappedto`](@ref PhyloCoalSimulations.population_mappedto)
+to extract the mapping information.
 
 ```@repl downstreamexamples
-node_count = Dict(n.name => 0      for n in net.node if !n.leaf) # ignore leaves
-node_hyb = Dict(n.name => n.hybrid for n in net.node if !n.leaf) # true/1 for hybrid nodes
-# traverse the gene tree, to count number of lineages entering each network node
-for n in tree.node
-  (n.leaf || n.name == "") && continue # skip leaves and nodes without a name
-  node_count[n.name] += 1  # increment by 1 the number of lineages entering this node
+# dictionary to store the count of extra lineages exiting each network edge. initialized at 0
+edge_count = Dict(e.number => 0 for e in net.edge)
+const PCS = PhyloCoalSimulations; # for lazy typing!
+for n in PCS.mappingnodes(tree)  # iterate over degree-2 mapping nodes in the gene tree
+  child = PCS.singlechildedge(n)
+  popid = PCS.population_mappedto(child) # number of species edge that 'n' came from
+  # sanity check below
+  isnothing(popid) && error("""population ID not found for the child edge of
+                    node number $(n.number) mapping to species node $(n.name).""")
+  edge_count[popid] += 1 # increment by 1 the number of lineages exiting population edge 'popid'
 end
-node_count # the 2 lineages entering I2 didn't coalesce until they reached I3
-for node in keys(node_count) # modify our counts, to only keep the extras
-  node_count[node] = max(0, node_count[node] - ( node_hyb[node] ? 1 : 2))
-end
-node_count # number of extra lineages: 1 extra entering I3
-deepcoalescence = sum(values(node_count))
+edge_count
 ```
+
+From this, we see two interesting things.
+- 0 lineages exited edge number 3 in the species network: it's the hybrid
+  edge from H1 to I3 (going back in time). That's because the only lineage
+  at H1 was interited from I2, so there weren't any lineage evolving through edge 3.
+- 2 lineages exited edge number 7 (going from I2 to I3 back in time),
+  so that's 1 extra lineage. All other edges look as expected, with a single
+  gene lineage exiting from them.
+
+We can now calculate the total number of extra lineages:
+
+```@repl downstreamexamples
+filter!(p -> p.second > 0, edge_count) # filter out edges without any gene lineage
+map!(k -> k-1, values(edge_count))     # calculate number of "extras": k-1
+deepcoalescence = sum(values(edge_count)) # sum 'extras' over all edges in the network
+```
+
 On the particular gene tree we simulated, we counted 1 deep coalescence.
 
 ## number of lineages inherited via gene flow
@@ -57,7 +78,9 @@ from each parent at H1, realized in the gene trees we actually simulated.
 To do so, we can count the number of gene lineages that are mapped to each
 hybrid edge in the network.
 
-This mapping is stored in the edge attribute `.inCycle`.
+This mapping is stored in the edge attribute `.inCycle` internally,
+but it's best to access it via the function [`population_mappedto`](@ref PhyloCoalSimulations.population_mappedto)
+(as the internal representation may change).
 From the plot above, the minor "gene flow" edge is edge number 5 and the
 major hybrid edge has number 3.
 So we can count the gene lineages inherited via gene flow
@@ -73,7 +96,12 @@ We use the first option with the `.inCycle` attribute below.
 We get that our one simulated gene tree was indeed inherited via gene flow:
 
 ```@repl downstreamexamples
-sum(e.inCycle == 5 for e in tree.edge)
+sum(e.inCycle == 5 for e in tree.edge) # or:
+sum(PCS.population_mappedto(e) == 5 for e in tree.edge)
+# or define a function to do this for any edge, so we can re-use later:
+nlineages_through(edgeID, gt) = sum(PCS.population_mappedto(e) == edgeID for e in gt.edge);
+nlineages_through(5, tree) # same as before!
+nlineages_through(3, tree) # lineages that went through edge 3, the major edge.
 ```
 
 To make this more interesting, we can simulate many gene trees
@@ -87,11 +115,11 @@ This proportion should be close (but not exactly equal) to the theoretical
 γ=0.4 from the network model.
 
 ```@repl downstreamexamples
-ngenes = 100
+ngenes = 100;
 genetrees = simulatecoalescent(net, ngenes, Dict("B"=>2, "A"=>1, "C"=>1); nodemapping=true);
 length(genetrees)
-nlineages_geneflow = sum(sum(e.inCycle == 5 for e in gt.edge) for gt in genetrees)
-nlineages_major    = sum(sum(e.inCycle == 3 for e in gt.edge) for gt in genetrees)
+nlineages_geneflow = sum(nlineages_through(5,gt) for gt in genetrees)
+nlineages_major    = sum(nlineages_through(3,gt) for gt in genetrees)
 # realized γ, close to 0.4:
 proportion_geneflow = nlineages_geneflow / (nlineages_geneflow + nlineages_major)
 ```
