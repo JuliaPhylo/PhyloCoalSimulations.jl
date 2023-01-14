@@ -158,6 +158,7 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals;
     inheritancecorrelation <= 1.0 || error("the inheritance correlation should be <= 1")
     independentlin = (inheritancecorrelation == 0.0)
     alpha = (1-inheritancecorrelation)/inheritancecorrelation # correlation = 1/(1+alpha)
+    PN.check_nonmissing_nonnegative_edgelengths(net, "the coalescent process cannot be simulated")
     for e in net.edge
         e.hybrid && e.gamma == -1.0 && error("the network needs gamma values")
     end
@@ -334,6 +335,7 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals,
         error("populationsize should be a number or dictionary")
     end
     # network with lengths in coalescent units
+    PN.check_nonmissing_nonnegative_edgelengths(net, "the coalescent process cannot be simulated")
     net_coal = deepcopy(net)
     for e in net_coal.edge
         e.length = e.length / Neff[e.number]

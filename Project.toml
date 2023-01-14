@@ -2,7 +2,7 @@ name = "PhyloCoalSimulations"
 uuid = "53f7b83a-06b5-4910-9a21-1896bf762ade"
 authors = ["Cecile Ane <cecileane@users.noreply.github.com>",
            "John Fogg <70609062+fogg-uw@users.noreply.github.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
