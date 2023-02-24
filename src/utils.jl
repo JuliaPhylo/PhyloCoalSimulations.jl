@@ -3,7 +3,9 @@
 
 Boolean: `true` if `node` has a single child edge,
 based on the edge's `isChild1` attribute.
-This function will soon be moved to PhyloNetworks.
+This function is now in [PhyloNetworks](https://crsl4.github.io/PhyloNetworks.jl/dev/lib/public/#PhyloNetworks.hassinglechild)
+and will be removed from this package once a new version
+of PhyloNetworks is registered.
 """
 hassinglechild(node::PN.Node) = sum(e -> PN.getParent(e) === node, node.edge) == 1
 
@@ -11,7 +13,10 @@ hassinglechild(node::PN.Node) = sum(e -> PN.getParent(e) === node, node.edge) ==
     singlechildedge(node)
 
 Child edge of `node`. Checks that it's a single child.
-This function will soon be moved to PhyloNetworks.
+This function is now implemented in PhyloNetworks as
+[`getchildedge`](https://crsl4.github.io/PhyloNetworks.jl/dev/lib/public/#PhyloNetworks.getchild)
+and will be removed from this package once a new version
+of PhyloNetworks is registered.
 """
 function singlechildedge(node::PN.Node)
     ce_ind = findall(e -> PN.getParent(e) === node, node.edge)
@@ -40,7 +45,7 @@ ismappingnode(n::PN.Node) = length(n.edge) == 2 && hassinglechild(n) && n.name !
 """
     mappingnodes(gene tree)
 
-Type to define an iterator over degree-2 mapping node in a gene tree, assuming these
+Type to define an iterator over degree-2 mapping nodes in a gene tree, assuming these
 degree-2 nodes (other than the root) have a name to map them to nodes in a
 species phylogeny. See [`ismappingnode`](@ref PhyloCoalSimulations.mappingnodes).
 """
