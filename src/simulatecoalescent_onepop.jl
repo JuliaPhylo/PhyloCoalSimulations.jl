@@ -273,7 +273,7 @@ function convert2tree!(rootnode::PN.Node)
 end
 function collect_edges_nodes!(net, parentedge)
     push!(net.edge, parentedge)
-    nn = PN.getChild(parentedge)
+    nn = PN.getchild(parentedge)
     push!(net.node, nn)
     for childedge in nn.edge
         childedge !== parentedge || continue # skip parentedge

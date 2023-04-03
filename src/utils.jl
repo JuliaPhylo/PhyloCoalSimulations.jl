@@ -1,30 +1,4 @@
 """
-    hassinglechild(node)
-
-Boolean: `true` if `node` has a single child edge,
-based on the edge's `isChild1` attribute.
-This function is now in [PhyloNetworks](https://crsl4.github.io/PhyloNetworks.jl/dev/lib/public/#PhyloNetworks.hassinglechild)
-and will be removed from this package once a new version
-of PhyloNetworks is registered.
-"""
-hassinglechild(node::PN.Node) = sum(e -> PN.getParent(e) === node, node.edge) == 1
-
-"""
-    singlechildedge(node)
-
-Child edge of `node`. Checks that it's a single child.
-This function is now implemented in PhyloNetworks as
-[`getchildedge`](https://crsl4.github.io/PhyloNetworks.jl/dev/lib/public/#PhyloNetworks.getchild)
-and will be removed from this package once a new version
-of PhyloNetworks is registered.
-"""
-function singlechildedge(node::PN.Node)
-    ce_ind = findall(e -> PN.getParent(e) === node, node.edge)
-    length(ce_ind) == 1 || error("node number $(node.number) has $(length(ce_ind)) children instead of 1 child")
-    return node.edge[ce_ind[1]]
-end
-
-"""
     population_mappedto(edge or node)
 
 Identifier of the population (edge in the species network) that a gene tree's
@@ -40,7 +14,7 @@ population_mappedto(e::Union{PN.Edge,PN.Node}) = (e.inCycle == -1 ? nothing : e.
 Boolean: true if `node` is of degree 2, has a single child, and has a name.
 (The root is of degree-2 but is not a mapping node).
 """
-ismappingnode(n::PN.Node) = length(n.edge) == 2 && hassinglechild(n) && n.name != ""
+ismappingnode(n::PN.Node) = length(n.edge) == 2 && PN.hassinglechild(n) && n.name != ""
 
 """
     mappingnodes(gene tree)

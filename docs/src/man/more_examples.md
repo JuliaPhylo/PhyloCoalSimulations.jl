@@ -41,7 +41,7 @@ to extract the mapping information.
 edge_count = Dict(e.number => 0 for e in net.edge)
 const PCS = PhyloCoalSimulations; # for lazy typing!
 for n in PCS.mappingnodes(tree)  # iterate over degree-2 mapping nodes in the gene tree
-  child = PCS.singlechildedge(n)
+  child = getchildedge(n)
   popid = PCS.population_mappedto(child) # number of species edge that 'n' came from
   # sanity check below
   isnothing(popid) && error("""population ID not found for the child edge of

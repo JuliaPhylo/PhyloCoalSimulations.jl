@@ -14,7 +14,7 @@ genetree = simulatecoalescent(net, 1, Dict("A"=>2, "B"=>1))
 genetree = simulatecoalescent(net, 1, 3; nodemapping=true)[1]
 tmp = map(n -> n.name, PCS.mappingnodes(genetree))
 @test !isempty(tmp) && all(tmp .== "minus2")
-@test Set(unique(PCS.population_mappedto.(PCS.singlechildedge.(PCS.mappingnodes(genetree))))) == Set((1,2))
+@test Set(unique(PCS.population_mappedto.(PN.getchildedge.(PCS.mappingnodes(genetree))))) == Set((1,2))
 @test Set(unique(PCS.population_mappedto.(genetree.node))) == Set((1,2,3,nothing))
 @test Set(unique(PCS.population_mappedto.(genetree.edge))) == Set((1,2,3))
 

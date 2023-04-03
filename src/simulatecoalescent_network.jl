@@ -176,7 +176,7 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals;
         parentedgelist = PN.Edge[]
         childedgelist = PN.Edge[]
         for e in nn.edge
-            PN.getChild(e) === nn ? push!(parentedgelist, e) : push!(childedgelist, e)
+            PN.getchild(e) === nn ? push!(parentedgelist, e) : push!(childedgelist, e)
         end
         push!(parentedges, parentedgelist)
         push!(childedges, childedgelist)
