@@ -7,7 +7,8 @@ can be used as a unique identifier of the edge above the network's root.
 get_rootedgenumber(net) = max(0, maximum(e.number for e in net.edge)) + 1
 
 """
-    simulatecoalescent(net, nloci, nindividuals; nodemapping=false, inheritancecorrelation=0.0)
+    simulatecoalescent(net, nloci, nindividuals;
+        nodemapping=false, inheritancecorrelation=0.0)
 
 Simulate `nloci` gene trees with `nindividuals` from each species
 under the multispecies network coalescent, along network `net`
@@ -54,6 +55,8 @@ the same (randomly sampled) parent. More generally, the lineages' parents
 are simulated according to a Dirichlet process with base distribution determined
 by the γ values, and with concentration parameter α = (1-r)/r, that is, r = 1/(1+α),
 where `r` is the input inheritance correlation.
+For more details about this model, please read the package manual or refer
+to [Fogg, Allman & Ané (2023)](https://doi.org/10.1101/2023.01.11.523690).
 
 Assumptions:
 - `net` must have non-missing edge lengths and γ values.
@@ -173,7 +176,7 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals;
         parentedgelist = PN.Edge[]
         childedgelist = PN.Edge[]
         for e in nn.edge
-            PN.getChild(e) === nn ? push!(parentedgelist, e) : push!(childedgelist, e)
+            PN.getchild(e) === nn ? push!(parentedgelist, e) : push!(childedgelist, e)
         end
         push!(parentedges, parentedgelist)
         push!(childedges, childedgelist)
@@ -269,7 +272,8 @@ end
 
 """
     simulatecoalescent(net, nloci, nindividuals, populationsize;
-        nodemapping=false, round_generationnumber=true, inheritancecorrelation=0.0)
+        nodemapping=false, round_generationnumber=true,
+        inheritancecorrelation=0.0)
 
 Simulate `nloci` gene trees with `nindividuals` from each species
 under the multispecies network coalescent, along network `net`,

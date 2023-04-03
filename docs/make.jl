@@ -22,6 +22,10 @@ makedocs(;
             "correlated inheritance" => "man/correlated_inheritance.md",
             "more examples" => "man/more_examples.md",
         ],
+        "library" => [
+            "public" => "lib/public.md",
+            "internals" => "lib/internal.md",
+        ]
     ],
 )
 

@@ -16,23 +16,42 @@ Another model is that the lineages at a hybrid node are *all* inherited
 from the same parent, still choosing a (common) parent according to the γ
 inheritance probabilities. This model has full (and positive) correlation
 between lineages, and was used by
-[Gerard, Gibbs & Kubatko (2011)](https://doi.org/10.1186/1471-2148-11-291).
+[Gerard, Gibbs & Kubatko (2011)](https://doi.org/10.1186/1471-2148-11-291)
+for example.
 
 The other extreme might be interesting for modelling allopolyploid events:
 of 2 lineages of the same locus at a hybrid node, exactly 1 of them comes
 from one parent, and the other comes from the other parent. This model
 would have negative correlation between lineages.
 
-By default, `simulatecoalescent` uses the traditional model, with independent
-lineages.
+By default, [`simulatecoalescent`](@ref) uses the traditional model,
+with independent lineages.
 
-It also has an option to simulate lineage inheritance with positive correlation.
+It also has an option to simulate lineage inheritance with positive correlation,
+under a coalescent model described in
+[Fogg, Allman & Ané (2023)](https://doi.org/10.1101/2023.01.11.523690).
 For this, lineages' parents are drawn according to a Dirichlet process with
 base distribution determined by the γ values, and with concentration parameter
 α = (1-r)/r, that is, r = 1/(1+α), where r is the input inheritance correlation.
-For example, if this correlation is set to 1, then α = 0 and all lineages inherit
-from the same (randomly sampled) parent. The independence model corresponds
-to r=0 and α infinite.
+More specifically, consider 2 individuals (alleles) at a given locus,
+that have not coalesced yet and are present at a give hybrid node.
+According to the coalescent model with correlated inheritance,
+the second individual is inherited from the same parent as the first individual
+with probability r. And with probability 1-r, the second individual is
+inherited from any parent (including the parent chosen by the first individual)
+based on their γ values.
+
+This model can be the result of different loci evolving according to different γ
+inheritance values. For example, loci that are under selection in the environment
+where gene flow occurred may be more likely to be passed through gene flow,
+whereas loci that are involved in reproduction barriers might be less likely
+to be passed through gene flow. This would result in different sets of γ values
+across different loci, and correlated inheritance overall.
+
+At one extreme, with correlation r=1 we have α = 0 and all lineages inherit
+from the same (randomly sampled) parent. This is the *common inheritance* model.
+The *independence model* corresponds to the other extreme r=0 and α infinite.
+
 The same correlation r (or concentration α) parameter is used at all hybrid nodes,
 but the Dirichlet process is applied independently across hybrid nodes.
 
