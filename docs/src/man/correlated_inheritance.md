@@ -16,7 +16,8 @@ Another model is that the lineages at a hybrid node are *all* inherited
 from the same parent, still choosing a (common) parent according to the γ
 inheritance probabilities. This model has full (and positive) correlation
 between lineages, and was used by
-[Gerard, Gibbs & Kubatko (2011)](https://doi.org/10.1186/1471-2148-11-291).
+[Gerard, Gibbs & Kubatko (2011)](https://doi.org/10.1186/1471-2148-11-291)
+for example.
 
 The other extreme might be interesting for modelling allopolyploid events:
 of 2 lineages of the same locus at a hybrid node, exactly 1 of them comes
