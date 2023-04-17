@@ -60,6 +60,13 @@ along non-ultrametric networks.
 If the network is ultrametric (time-consistent, and with all tips at the
 same distance from the root), then gene trees will also be ultrametric.
 
+!!! note "rooting"
+    The input network needs to be rooted correctly, as some properties of gene
+    trees may depend on the root. If a network was estimated using a method that
+    estimates a semidirected network (where the root placement is arbitrary)
+    then make sure to root this network appropriately, e.g. using an outgroup,
+    before simulating genes along this network.
+
 ### basic example: simulate, save to file, plot
 
 We use [`simulatecoalescent`](@ref) to simulate gene trees along this network.
@@ -107,7 +114,7 @@ nothing # hide
 ```
 ![3-taxon network](../assets/figures/genetrees_gettingstarted_1.svg)
 
-### several individuals per species
+## several individuals per species
 
 We can ask for more individuals. To simulate 3 individuals / species for example:
 
