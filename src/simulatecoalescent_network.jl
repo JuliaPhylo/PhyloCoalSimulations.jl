@@ -56,7 +56,7 @@ are simulated according to a Dirichlet process with base distribution determined
 by the γ values, and with concentration parameter α = (1-r)/r, that is, r = 1/(1+α),
 where `r` is the input inheritance correlation.
 For more details about this model, please read the package manual or refer
-to [Fogg, Allman & Ané (2023)](https://doi.org/10.1101/2023.01.11.523690).
+to [Fogg, Allman & Ané (2023)](https://doi.org/10.1093/sysbio/syad030).
 
 Assumptions:
 - `net` must have non-missing edge lengths and γ values.

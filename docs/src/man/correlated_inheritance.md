@@ -29,7 +29,7 @@ with independent lineages.
 
 It also has an option to simulate lineage inheritance with positive correlation,
 under a coalescent model described in
-[Fogg, Allman & Ané (2023)](https://doi.org/10.1101/2023.01.11.523690).
+[Fogg, Allman & Ané (2023)](https://doi.org/10.1093/sysbio/syad030).
 For this, lineages' parents are drawn according to a Dirichlet process with
 base distribution determined by the γ values, and with concentration parameter
 α = (1-r)/r, that is, r = 1/(1+α), where r is the input inheritance correlation.
