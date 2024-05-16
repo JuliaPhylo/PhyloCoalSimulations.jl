@@ -71,7 +71,7 @@ function simulatecoal_onepopulation!(
             return nextid # breaks the while loop
         end
         # at this point: 2 or more lineages
-        coaltime = rand(Exponential(1/binomial(nlineage,2)))
+        coaltime = rand(rng, Exponential(1/binomial(nlineage,2)))
         toadd = min(coaltime, timeleft)
         for e in lineagelist
             e.length += toadd
@@ -81,9 +81,9 @@ function simulatecoal_onepopulation!(
             return nextid
         end
         # pick at random 2 lineages to merge, into a new node numbered nextid
-        drop_index = sample(1:nlineage)
+        drop_index = sample(rng, 1:nlineage)
         edge1 = popat!(lineagelist, drop_index) # popat! requires julia v1.5
-        drop_index = sample(1:(nlineage-1))
+        drop_index = sample(rng, 1:(nlineage-1))
         edge2 = lineagelist[drop_index]
         parentedge = coalescence_edge(edge1,edge2,nextid,populationid)
         lineagelist[drop_index] = parentedge
