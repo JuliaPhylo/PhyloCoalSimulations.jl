@@ -7,7 +7,7 @@ can be used as a unique identifier of the edge above the network's root.
 get_rootedgenumber(net) = max(0, maximum(e.number for e in net.edge)) + 1
 
 """
-    simulatecoalescent(net, nloci, nindividuals;
+    simulatecoalescent([rng::AbstractRNG,] net, nloci, nindividuals;
         nodemapping=false, inheritancecorrelation=0.0)
 
 Simulate `nloci` gene trees with `nindividuals` from each species
@@ -15,6 +15,8 @@ under the multispecies network coalescent, along network `net`
 whose branch lengths are assumed to be in **coalescent units**
 (ratio: number of generations / effective population size).
 The coalescent model uses the infinite-population-size approximation.
+
+The random number generator `rng` is optional.
 
 Output: vector of gene trees, of length `nloci`.
 
@@ -147,8 +149,17 @@ julia> [(tree_edge_number = e.number, pop_edge_number = e.inCycle) for e in tree
  (tree_edge_number = 1, pop_edge_number = 1)
 ```
 """
-function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals;
-        nodemapping=false, inheritancecorrelation=0.0)
+function simulatecoalescent(net::PN.HybridNetwork, args...; kwargs...)
+    simulatecoalescent(default_rng(), net, args...; kwargs...)
+end
+function simulatecoalescent(
+    rng::AbstractRNG,
+    net::PN.HybridNetwork,
+    nloci::Integer,
+    nindividuals;
+    nodemapping=false,
+    inheritancecorrelation=0.0
+)
     if isa(nindividuals, AbstractDict)
         issubset(PN.tipLabels(net), keys(nindividuals)) || error("nindividuals is missing some species")
         valtype(nindividuals) <: Integer || error("nindividuals should be integers")
@@ -201,7 +212,7 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals;
                 f = initializetipforest(nn, nindividuals[nn.name], nextid)
                 nextid += nindividuals[nn.name]
                 edge2forest[ee.number] = f
-                nextid = simulatecoal_onepopulation!(f, ee.length, nextid, ee.number)
+                nextid = simulatecoal_onepopulation!(rng, f, ee.length, nextid, ee.number)
                 continue 
             end
             # gather forest from children
@@ -218,19 +229,19 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals;
                     nextid = map2population!(f, nn, ee.number, nextid)
                 end
                 edge2forest[ee.number] = f
-                nextid = simulatecoal_onepopulation!(f, ee.length, nextid, ee.number)
+                nextid = simulatecoal_onepopulation!(rng, f, ee.length, nextid, ee.number)
             elseif nparents > 1
                 # partition forest's lineages randomly across all parent edges
                 parentprob = [e.gamma for e in parentedgelist]
                 parentdist = Distributions.Categorical(parentprob)
                 if independentlin
                     for genetree in f
-                      roll = rand(parentdist)
+                      roll = rand(rng, parentdist)
                       push!(edge2forest[parentedgelist[roll].number], genetree)
                     end
                 else # then use a Dirichlet process to simulate correlated parents
                     # do one lineage. Often, f has a single lineage
-                    roll = rand(parentdist)
+                    roll = rand(rng, parentdist)
                     push!(edge2forest[parentedgelist[roll].number], pop!(f))
                     # other lineages: change parent probabilities in place
                     priorconc = postconc = alpha
@@ -240,7 +251,7 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals;
                         probprevious = 1.0 / postconc
                         parentprob .*= priorconc * probprevious
                         parentprob[roll] += probprevious
-                        roll = rand(parentdist)
+                        roll = rand(rng, parentdist)
                         push!(edge2forest[parentedgelist[roll].number], genetree)
                         priorconc = postconc
                     end
@@ -251,7 +262,7 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals;
                     if nodemapping # degree-2 nodes named after nn, and forest edges mapping to chosen ee
                         nextid = map2population!(f, nn, ee.number, nextid)
                     end
-                    nextid = simulatecoal_onepopulation!(f, ee.length, nextid, ee.number)
+                    nextid = simulatecoal_onepopulation!(rng, f, ee.length, nextid, ee.number)
                 end
             else # nparents = 0: infinite root population
                 # f can have a single edge if a displayed tree's MRCA is strictly below the root,
@@ -260,7 +271,7 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals;
                     if nodemapping
                         nextid = map2population!(f, nn, rootedgenumber, nextid)
                     end
-                    nextid = simulatecoal_onepopulation!(f, Inf, nextid, rootedgenumber)
+                    nextid = simulatecoal_onepopulation!(rng, f, Inf, nextid, rootedgenumber)
                 end
                 rootnode = f[1].node[1]
                 genetreelist[ilocus] = convert2tree!(rootnode)
@@ -271,7 +282,7 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals;
 end
 
 """
-    simulatecoalescent(net, nloci, nindividuals, populationsize;
+    simulatecoalescent([rng::AbstractRNG,] net, nloci, nindividuals, populationsize;
         nodemapping=false, round_generationnumber=true,
         inheritancecorrelation=0.0)
 
@@ -325,8 +336,16 @@ julia> writeMultiTopology(genetrees, stdout) # branch lengths: number of generat
 
 ```
 """
-function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals, Neff;
-        nodemapping=false, round_generationnumber=true, inheritancecorrelation=0.0)
+function simulatecoalescent(
+    rng::AbstractRNG,
+    net::PN.HybridNetwork,
+    nloci::Integer,
+    nindividuals,
+    Neff;
+    nodemapping=false,
+    round_generationnumber=true,
+    inheritancecorrelation=0.0
+)
     popedgenumbers = [e.number for e in net.edge]
     push!(popedgenumbers, get_rootedgenumber(net))
     if isa(Neff, AbstractDict)
@@ -345,7 +364,7 @@ function simulatecoalescent(net::PN.HybridNetwork, nloci::Integer, nindividuals,
         e.length = e.length / Neff[e.number]
     end
     # simulate gene trees
-    genetreelist = simulatecoalescent(net_coal,nloci,nindividuals; nodemapping=true,
+    genetreelist = simulatecoalescent(rng, net_coal,nloci,nindividuals; nodemapping=true,
         inheritancecorrelation=inheritancecorrelation);
     # convert lengths to #generations in gene trees
     for gt in genetreelist

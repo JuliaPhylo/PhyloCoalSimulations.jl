@@ -1,6 +1,10 @@
 """
-    simulatecoal_onepopulation!(lineagelist, population_length, nextlineageID,
-                               populationID=-1)
+    simulatecoal_onepopulation!([rng::AbstractRNG,]
+        lineagelist,
+        population_length,
+        nextlineageID,
+        populationID=-1
+    )
 
 Simulate the coalescent process within a single population of length given
 in coalescent units, starting from lineages in `lineagelist`. This list should
@@ -9,6 +13,8 @@ be a vector of incomplete edges, that is, edges incident to a single node only.
 Vector of incomplete edges, whose lengths have been increased, is modified in place.
 New nodes and their parent edges are created by coalescent events, numbered
 with consecutive integers starting at `nextlineageID`.
+
+The random number generator `rng` is optional.
 
 Output: nextlineageID, incremented by number of new lineages.
 
@@ -43,8 +49,16 @@ tip labels: s2, s1
 
 ```
 """
-function simulatecoal_onepopulation!(lineagelist::AbstractVector,
-            poplen::AbstractFloat, nextid::Int, populationid = -1)
+function simulatecoal_onepopulation!(lineagelist::AbstractVector, args...)
+    simulatecoal_onepopulation!(default_rng(), lineagelist, args...)
+end
+function simulatecoal_onepopulation!(
+    rng::AbstractRNG,
+    lineagelist::AbstractVector,
+    poplen::AbstractFloat,
+    nextid::Int,
+    populationid = -1
+)
     isempty(lineagelist) && return(nextid)
     poplen > 0.0 || return(nextid)
     # at this point: the list has 1 or more lineages
