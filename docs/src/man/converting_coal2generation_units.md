@@ -1,5 +1,5 @@
 ```@setup converting
-using PhyloNetworks, PhyloPlots, PhyloCoalSimulations
+using PhyloNetworks, PhyloPlots, PhyloCoalSimulations, StableRNGs
 figpath = joinpath("..", "assets", "figures"); mkpath(figpath)
 figname(x) = joinpath(figpath, x)
 net = readTopology("((C:0.9,(B:0.2)#H1:0.7::0.6)i1:0.6,(#H1:0.6::0.4,A:1.0)i2:0.5)i3;");
@@ -76,8 +76,9 @@ above the network. Below, we simulate a population size for each population,
 from a uniform distribution between 1,000 and 1,500.
 
 ```@repl converting
+using Distributions
 # uniform distribution between 1000 and 1500, that we can draw from later
-Ne_distribution() = round(Int, 1000 + 500*Random.rand());
+Ne_distribution() = rand(rng, DiscreteUniform(1000, 1500));
 Ne = Dict(e.number => Ne_distribution() for e in net_gen.edge);
 rootedgenumber = PhyloCoalSimulations.get_rootedgenumber(net_gen)
 push!(Ne, rootedgenumber => Ne_distribution()); # Nₑ above the root
