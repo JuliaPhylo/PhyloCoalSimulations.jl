@@ -6,6 +6,7 @@ PhyloCoalSimulations = "53f7b83a-06b5-4910-9a21-1896bf762ade"
 PhyloNetworks = "33ad39ac-ed31-50eb-9b15-43d0656eaa72"
 PhyloPlots = "c0d5b6db-e3fc-52bc-a87d-1d050989ed3b"
 RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
+StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
 
 [compat]
 Documenter = "1"

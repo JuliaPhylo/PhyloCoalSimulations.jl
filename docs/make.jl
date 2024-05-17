@@ -6,11 +6,10 @@ DocMeta.setdocmeta!(PhyloCoalSimulations, :DocTestSetup, :(using PhyloCoalSimula
 makedocs(;
     modules=[PhyloCoalSimulations],
     authors="Cecile Ane <cecileane@users.noreply.github.com> and contributors",
-    repo="https://github.com/cecileane/PhyloCoalSimulations.jl/blob/{commit}{path}#{line}",
     sitename="PhyloCoalSimulations.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://cecileane.github.io/PhyloCoalSimulations.jl",
+        canonical="https://cecileane.github.io/PhyloCoalSimulations.jl/stable/",
         assets=String[],
     ),
     pages=[

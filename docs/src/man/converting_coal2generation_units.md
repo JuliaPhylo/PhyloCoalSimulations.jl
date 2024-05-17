@@ -2,7 +2,7 @@
 using PhyloNetworks, PhyloPlots, PhyloCoalSimulations
 figpath = joinpath("..", "assets", "figures"); mkpath(figpath)
 figname(x) = joinpath(figpath, x)
-net = readTopology("((C:0.9,(B:0.2)#H1:0.7::0.6)I1:0.6,(#H1:0.6::0.4,A:1.0)I2:0.5)I3;");
+net = readTopology("((C:0.9,(B:0.2)#H1:0.7::0.6)i1:0.6,(#H1:0.6::0.4,A:1.0)i2:0.5)i3;");
 ```
 
 # converting between units
@@ -23,8 +23,8 @@ including the root edge.
 Here is an example using the same network and simulated gene tree as earlier.
 ```@repl converting
 writeTopology(net)
-using Random; Random.seed!(261); # as in mapping block
-tree = simulatecoalescent(net,1,1; nodemapping=true)[1];
+rng = StableRNG(7); # as in mapping section
+tree = simulatecoalescent(rng, net,1,1; nodemapping=true)[1];
 writeTopology(tree, round=true)
 ```
 ![example 1, same as in mapping section](../assets/figures/genetree_example1.svg)
@@ -68,7 +68,7 @@ then the coalescence rate on that edge is determined by the harmonic mean
 
 Let's assume we have a network with number of generations as edge lengths:
 ```@repl converting
-net_gen = readTopology("((C:900,(B:200)#H1:700::0.6)I1:600,(#H1:600::0.4,A:1000)I2:500)I3;");
+net_gen = readTopology("((C:900,(B:200)#H1:700::0.6)i1:600,(#H1:600::0.4,A:1000)i2:500)i3;");
 ```
 and that we have a dictionary listing the (harmonic mean) population
 size along each edge of the species network, and also along the root edge
@@ -116,6 +116,6 @@ writeMultiTopology(genetree_gen, stdout) # 3 gene trees, lengths in #generations
 
 !!! warning
     When Nₑ is given as an extra input to `simulatecoalescent`,
-    edge lengths in the network are assumed to be in # of generations.
+    edge lengths in the network are assumed to be in number of generations.
     If Nₑ is *not* given as input, then edge lengths are assumed to be
     in coalescent units.

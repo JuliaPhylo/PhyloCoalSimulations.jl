@@ -67,7 +67,7 @@ Assumptions:
 
 # examples
 
-```jldoctest
+```jldoctest simcoal
 julia> using PhyloNetworks
 
 julia> net = readTopology("(A:1,B:1);"); # branch lengths of 1 coalescent unit
@@ -96,57 +96,68 @@ PhyloNetworks.HybridNetwork, Rooted Network
 tip labels: B_2, B_1, B_3, A_3, ...
 (((B_2:0.12,B_1:0.12):2.39,B_3:2.51):0.692,(A_3:0.518,(A_2:0.461,A_1:0.461):0.057):2.684);
 
+
 julia> simulatecoalescent(net, 1, Dict("A"=>2, "B"=>1))[1] # 2 individuals in A, 1 in B
 PhyloNetworks.HybridNetwork, Rooted Network
 4 edges
 5 nodes: 3 tips, 0 hybrid nodes, 2 internal tree nodes.
 tip labels: B, A_2, A_1
 (B:2.801,(A_2:0.344,A_1:0.344):2.457);
+```
 
+In the next example, we use a custom random number generator (RNG), to show how
+to do so. In this example we use a stable RNG to make the example reproducible
+across julia versions. However, this particular RNG is *not* recommended.
+The RNG used by default is better (e.g. much more efficient).
 
-julia> Random.seed!(21);
+```jldoctest simcoal
+julia> # using Pkg; Pkg.add("StableRNGs") # to install StableRNGs if not done earlier
 
-julia> tree1 = simulatecoalescent(net,2,2; nodemapping=true)[1]; # first gene tree only
+julia> using StableRNGs
+
+julia> rng = StableRNG(791);
+
+julia> tree1 = simulatecoalescent(rng, net,2,2; nodemapping=true)[1]; # first gene tree only
 
 julia> writeTopology(tree1, round=true)
-"((B_1:1.0)minus2:0.301,(((A_2:0.11,A_1:0.11):0.89)minus2:0.148,(B_2:1.0)minus2:0.148):0.153);"
+"(((B_2:0.82,B_1:0.82):0.18)minus2:0.992,((A_1:1.0)minus2:0.427,(A_2:1.0)minus2:0.427):0.565);"
 
-julia> PhyloNetworks.nameinternalnodes!(net, "I"); writeTopology(net)
-"(A:1.0,B:1.0)I1;"
+julia> PhyloNetworks.nameinternalnodes!(net, "i"); writeTopology(net)
+"(A:1.0,B:1.0)i1;"
 
-julia> tree1 = simulatecoalescent(net,2,2; nodemapping=true)[1]; writeTopology(tree1, round=true)
-"(((B_2:0.214,B_1:0.214):0.786)I1:0.168,((A_2:1.0)I1:0.008,(A_1:1.0)I1:0.008):0.16);"
+julia> tree1 = simulatecoalescent(rng, net,2,2; nodemapping=true)[1]; writeTopology(tree1, round=true)
+"((B_2:1.0)i1:0.621,((B_1:1.0)i1:0.018,((A_1:0.61,A_2:0.61):0.39)i1:0.018):0.604);"
 
 julia> printNodes(net)
 node leaf  hybrid hasHybEdge name inCycle edges'numbers
 1    true  false  false      A    -1      1   
 2    true  false  false      B    -1      2   
--2   false false  false      I1   -1      1    2   
+-2   false false  false      i1   -1      1    2   
 
 julia> printNodes(tree1)
 node leaf  hybrid hasHybEdge name inCycle edges'numbers
 10   false false  false           3       8    9   
-8    false false  false      I1   -1      5    8   
-5    false false  false           2       4    3    5   
-4    true  false  false      B_2  -1      4   
-3    true  false  false      B_1  -1      3   
+8    false false  false      i1   -1      5    8   
+5    true  false  false      B_2  -1      5   
 9    false false  false           3       7    6    9   
-7    false false  false      I1   -1      2    7   
-2    true  false  false      A_2  -1      2   
-6    false false  false      I1   -1      1    6   
+7    false false  false      i1   -1      4    7   
+4    true  false  false      B_1  -1      4   
+6    false false  false      i1   -1      3    6   
+3    false false  false           1       1    2    3   
 1    true  false  false      A_1  -1      1   
+2    true  false  false      A_2  -1      2   
 
 julia> [(tree_edge_number = e.number, pop_edge_number = e.inCycle) for e in tree1.edge]
-9-element Vector{NamedTuple{(:tree_edge_number, :pop_edge_number), Tuple{Int64, Int64}}}:
+9-element Vector{@NamedTuple{tree_edge_number::Int64, pop_edge_number::Int64}}:
  (tree_edge_number = 8, pop_edge_number = 3)
  (tree_edge_number = 5, pop_edge_number = 2)
- (tree_edge_number = 4, pop_edge_number = 2)
- (tree_edge_number = 3, pop_edge_number = 2)
  (tree_edge_number = 9, pop_edge_number = 3)
  (tree_edge_number = 7, pop_edge_number = 3)
- (tree_edge_number = 2, pop_edge_number = 1)
+ (tree_edge_number = 4, pop_edge_number = 2)
  (tree_edge_number = 6, pop_edge_number = 3)
+ (tree_edge_number = 3, pop_edge_number = 1)
  (tree_edge_number = 1, pop_edge_number = 1)
+ (tree_edge_number = 2, pop_edge_number = 1)
 ```
 """
 function simulatecoalescent(net::PN.HybridNetwork, args...; kwargs...)
