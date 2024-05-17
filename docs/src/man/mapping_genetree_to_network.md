@@ -1,5 +1,5 @@
 ```@setup mapping
-using PhyloNetworks, PhyloPlots, PhyloCoalSimulations, RCall, DataFrames
+using PhyloNetworks, PhyloPlots, PhyloCoalSimulations, RCall, DataFrames, StableRNGs
 figpath = joinpath("..", "assets", "figures"); mkpath(figpath)
 figname(x) = joinpath(figpath, x)
 ```
@@ -19,11 +19,11 @@ can later map nodes in the gene tree.
 
 ```@repl mapping
 net = readTopology("((C:0.9,(B:0.2)#H1:0.7::0.6):0.6,(#H1:0.6,A:1):0.5);");
-PhyloNetworks.nameinternalnodes!(net, "I"); # "I" is a prefix to name internal nodes
+PhyloNetworks.nameinternalnodes!(net, "i"); # "i" is a prefix to name internal nodes
 writeTopology(net)
 ```
 
-Notice the extra node names in the species phylogeny: I1, I2, and I3 at the root.
+Notice the extra node names in the species phylogeny: i1, i2, and i3 at the root.
 
 Next, we use the option `nodemapping=true` when simulating gene trees,
 to ask for extra degree-2 nodes in gene trees. These nodes are created each time
@@ -32,18 +32,18 @@ each time that a gene tree lineage crosses a speciation node or a hybridization 
 We'll simulate a single tree here each time.
 
 ```@repl mapping
-using Random; Random.seed!(261); # to replicate randomness
-tree_regular = simulatecoalescent(net,1,1)[1];
+using StableRNGs; rng = StableRNG(7); # to replicate randomness, but default RNG is better
+tree_regular = simulatecoalescent(rng, net,1,1)[1];
 writeTopology(tree_regular, round=true) # regular nodes only
-Random.seed!(261); # to replicate the same coalescent simulation
-tree = simulatecoalescent(net,1,1; nodemapping=true)[1];
+rng = StableRNG(7); # to replicate the same coalescent simulation
+tree = simulatecoalescent(rng, net,1,1; nodemapping=true)[1];
 writeTopology(tree, round=true) # extra degree-2 nodes for mapping
 ```
 
 Notice that regular nodes in the gene tree (nodes that we get without the
 `nodemapping` option) don't have names. With the `nodemapping` option, there are
 many new nodes, all of degree-2, named after internal nodes in the network
-(I1, I2, I3). These extra degree-2 nodes and their names are sufficient to map
+(i1, i2, i3). These extra degree-2 nodes and their names are sufficient to map
 the gene tree into the species network.
 
 The network is shown on the left below, with edges annotated by their numbers.
@@ -73,8 +73,8 @@ For example, the horizontal line tracing B's ancestry back in time maps into the
 network like this:
 - from B, go back along edge 2
 - meet hybrid node H1, was inherited from the minor hybrid edge 5,
-- from speciation node I2, trace back along edge 7,
-- meet the network's root node I3, trace back along the network's root edge 8
+- from speciation node i2, trace back along edge 7,
+- meet the network's root node i3, trace back along the network's root edge 8
   before coalescing with the ancestor of the other lineages (which have already
   coalesced by then).
 

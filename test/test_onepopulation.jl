@@ -14,20 +14,21 @@ f2 = PCS.initializetipforest(e1.node[1],2,4)
 @test [e.node[1].number for e in f2] == [4,5]
 
 e2 = PCS.initializetip("s","2",2,"")
-Random.seed!(432)
 f1 = [e1,e2]
-@test PCS.simulatecoal_onepopulation!(f1, 0.1, 3) == 3
+rng = StableRNG(432)
+@test PCS.simulatecoal_onepopulation!(rng, f1, 0.1, 3) == 3
 @test length(f1) == 2
 @test all(f1 .=== (e1,e2))
 @test e1.length ≈ 0.1
 @test e2.length ≈ 0.1
 
-@test PCS.simulatecoal_onepopulation!(f1, Inf, 4) == 5
+@test PCS.simulatecoal_onepopulation!(rng, f1, Inf, 4) == 5
 @test length(f1) == 1
 net = PCS.convert2tree!(f1[1].node[1])
 testgenetree = (VERSION < v"1.6"  ?   "(s1:0.5,s2:0.5);" : # for julia v1.5
     ( v"1.7" <= VERSION < v"1.10-" ? "(s2:0.9,s1:0.9);" :   # for julia v1.7-v1.9
-    "random genetree depends on RNG")) # for later
+    "random genetree depends on RNG")) # for later: not used, switched to StableRNG
+testgenetree = "(s1:0.8,s2:0.8);"
 @test PN.writeTopology(net, round=true, digits=1) == testgenetree
 
 end

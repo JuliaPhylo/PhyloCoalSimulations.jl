@@ -14,15 +14,18 @@ References:
 please see [bibtex entries here](https://github.com/cecileane/PhyloCoalSimulations.jl/blob/main/CITATION.bib).
 
 - for this package and the network coalescent model with inheritance correlation:\
-  [Fogg, Allman & Ané (2023)](https://doi.org/10.1093/sysbio/syad030)
+  Fogg, Allman & Ané (2023).
   PhyloCoalSimulations: A simulator for network multispecies coalescent models,
   including a new extension for the inheritance of gene flow.
+  [Systematic Biology](https://academic.oup.com/sysbio/advance-article/doi/10.1093/sysbio/syad030/7187011?guestAccessKey=616778e9-ea09-4e4e-9853-229499b5f068),
+  72(5):1171–1179.
+  [doi:10.1093/sysbio/syad030](https://doi.org/10.1093/sysbio/syad030).
 
 - for [PhyloNetworks](https://github.com/crsl4/PhyloNetworks.jl),
   which this package depends on:\
   Solís-Lemus, Bastide & Ané (2017).
   PhyloNetworks: a package for phylogenetic networks.
-  [Molecular Biology and Evolution](https://academic.oup.com/mbe/article/doi/10.1093/molbev/msx235/4103410/PhyloNetworks-a-package-for-phylogenetic-networks?guestAccessKey=230afceb-df28-4160-832d-aa7c73f86369)
+  [Molecular Biology and Evolution](https://academic.oup.com/mbe/article/doi/10.1093/molbev/msx235/4103410/PhyloNetworks-a-package-for-phylogenetic-networks?guestAccessKey=230afceb-df28-4160-832d-aa7c73f86369),
   34(12):3292–3298.
   [doi:10.1093/molbev/msx235](https://doi.org/10.1093/molbev/msx235)
 

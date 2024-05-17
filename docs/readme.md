@@ -5,13 +5,14 @@
   (go to `dev/` or `stable/`)
   using github and files committed to the `gh-pages` branch.
 
-The workflow is controlled by `.github/workflows/CI.yml`, which launches
-`docs/make.jl`. To meet the dependency on R (via PhyloPlots) CI.yml installs R.
+The workflow is controlled by `.github/workflows/documentation.yml`,
+which launches `docs/make.jl`.
+To meet the dependency on R (via PhyloPlots) documentation.yml installs R.
 
 ## what to update
 
 - Documenter version in `docs/Project.toml`
-- update Julia version in `.github/workflows/CI.yml` under `docs:`.
+- update Julia version in `.github/workflows/documentation.yml`
 
 ## to build the documentation locally
 

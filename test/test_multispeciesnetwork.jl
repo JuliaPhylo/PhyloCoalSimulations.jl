@@ -1,6 +1,6 @@
 @testset "multi-species network" begin
 
-# on a tree
+# on a tree, method taking the default RNG
 net = PN.readTopology("(A:1,B:1);")
 Random.seed!(432)
 genetree = simulatecoalescent(net, 1, 2)
@@ -10,7 +10,7 @@ genetree = simulatecoalescent(net, 1, 2)
 # differing number of individuals / species
 genetree = simulatecoalescent(net, 1, Dict("A"=>2, "B"=>1))
 @test sort(tipLabels(genetree[1])) == ["A_1","A_2","B"]
-# nodemapping are related utilities
+# nodemapping and related utilities
 genetree = simulatecoalescent(net, 1, 3; nodemapping=true)[1]
 tmp = map(n -> n.name, PCS.mappingnodes(genetree))
 @test !isempty(tmp) && all(tmp .== "minus2")
@@ -61,18 +61,19 @@ function checknodeattributes(genetree)
   return nd2
 end
 myseed = 1624
-Random.seed!(myseed)
-gt1 = simulatecoalescent(net, 1, 3)[1]
+rng = StableRNG(myseed) # Random.seed!(myseed)
+gt1 = simulatecoalescent(rng, net, 1, 3)[1]
 ndegree2 = checknodeattributes(gt1)
 @test ndegree2 == 1 # root only, when nodemapping=false
-Random.seed!(myseed)  # same as before
-gt2 = simulatecoalescent(net, 1, 3; nodemapping=true)[1]
+rng = StableRNG(myseed)  # same as before
+gt2 = simulatecoalescent(rng, net, 1, 3; nodemapping=true)[1]
 ndegree2 = checknodeattributes(gt2)
 @test ndegree2 >= 9
+# check edge lengths: okay bc stable RNG
+@test writeTopology(gt2, round=true, digits=2) == "((((((t2_2:0.12)minus6:1.09)minus4:0.01)minus3:0.38)minus2:0.45,(((((t8_1:0.35,(t8_2:0.07,t8_3:0.07):0.28):0.13)H17:0.74)H14:0.14)minus7:0.26)minus2:0.45):0.55,(((((((t7_3:0.12)minus6:0.06,(t7_1:0.12)minus6:0.06):0.57,((t2_1:0.12)minus6:0.32,((t7_2:0.12)minus6:0.05,(t2_3:0.12)minus6:0.05):0.27):0.31):0.46)minus4:0.01)minus3:0.18,((t5_1:0.2,(t5_3:0.04,t5_2:0.04):0.16):1.03)minus3:0.18):0.2)minus2:1.0);"
 # fuse degree-2 nodes in gt2, then check that gt2 == gt1
 PN.removedegree2nodes!(gt2, true)
 @test hardwiredClusterDistance(gt1, gt2, true)==0
-# ideally: also check for equal edge lengths. Not done here
 
 #= simulate 1000 gene trees, 1 indiv/species, then check:
 - correct quartet CFs (approximately)
@@ -81,9 +82,9 @@ on same net as earlier (4-species net, but rotated)
 =#
 net = PN.readTopology("((t5:1.228,((t7:0.118,t2:0.118):1.095,(#H17:0.735::0.4)#H14:0.0::0.7):0.014):0.384,(#H14:0.14::0.3,(t8:0.478)#H17:0.875::0.6):0.259);")
 nsim = 1000
-Random.seed!(1602)
-genetrees = simulatecoalescent(net, nsim, 1)
-α = 0.05 # to test "approximately" correct results
+rng = StableRNG(1602)
+genetrees = simulatecoalescent(rng, net, nsim, 1)
+α = 0.40 # to test "approximately" correct results
 #= expected CF:
 plot(net, showedgenumber=true, showgamma=true);
 t2,t7 sister after cut edge 6, t8 only descendant of either hybrid node, so:
@@ -126,13 +127,13 @@ expdist2 = Distributions.Exponential(2)
 # on a tree with #generations + Ne dictionary
 net = PN.readTopology("(A:1000,B:1000);")
 Ne = Dict(1=>20, 2=>300, 3=>300)
-Random.seed!(639)
-genetree = simulatecoalescent(net, 1, 2, Ne)[1]
+rng = StableRNG(639)
+genetree = simulatecoalescent(rng, net, 1, 2, Ne)[1]
 @test all(sort!([e.length for e in genetree.edge]) .> [1,1, 15,15, 800,800])
 # modify the tree to have same population size on all branches
 Ne = 20
-genetree = simulatecoalescent(net, 1, 2, Ne)[1]
-@test all(sort!([e.length for e in genetree.edge]) .> [1,1, 1,1, 800,800])
+genetree = simulatecoalescent(rng, net, 1, 2, Ne)[1]
+@test all(sort!([e.length for e in genetree.edge]) .> [1,1, 5,5, 800,800])
 
 # test edge cases (like incorrect input)
 # (because i am hungry for 100% code coverage)
@@ -152,23 +153,24 @@ end
 
 net = PN.readTopology("((((a:0.01)#H1:0.21::0.6,(#H1:0.1::0.4)#H3:0.11::0.6)i1:0.2)#H2:22.4::0.6,(#H2:11.1,#H3:11.41)i2:11.3)i3;")
 # plot(net, showedgelength=true, shownodelabel=true, useedgelength=true);
-Random.seed!(1234)
-res = simulatecoalescent(net, 10, 2; inheritancecorrelation=0.99)
-@test all(all(e.length < 10 for e in t.edge) for t in res)
-Random.seed!(544)
-res = simulatecoalescent(net, 10, 2; inheritancecorrelation=0.01)
+rng = StableRNG(1234)
+res = simulatecoalescent(rng, net, 10, 2; inheritancecorrelation=0.99)
+@test all(all(e.length < 5 for e in t.edge) for t in res)
+rng = StableRNG(544)
+res = simulatecoalescent(rng, net, 10, 2; inheritancecorrelation=0.01)
 @test sum(all(e.length < 10 for e in t.edge) for t in res) <= 5
 # res = simulatecoalescent(net, 1, 5; inheritancecorrelation=0.99, nodemapping=true)[1]
 # plot(res, shownodelabel=true); # see identical mapping from the root to all tips
 net = PN.readTopology("((t:0.0)#H1:200::0.6,#H1:200)r;")
 tips_alltogether(n) = all(e -> e.length < 100, n.edge)
-Random.seed!(582)
+rng = StableRNG(581)
 @testset "correlated inheritance" for rho in [0.8,0.3,0.1]
-  res = simulatecoalescent(net, 100, 2; inheritancecorrelation=rho);
-  @test isapprox(sum(tips_alltogether.(res))/100,  1 - (2*0.6*0.4)*(1-rho), atol=0.1)
+  res = simulatecoalescent(rng, net, 100, 2; inheritancecorrelation=rho);
+  @test isapprox(sum(tips_alltogether.(res))/100,  1 - (2*0.6*0.4)*(1-rho), atol=0.06)
 end
 # in Ne, and option to not round #generations in gene tree
 Ne=0.1
-@test_logs simulatecoalescent(net, 1, 4, Ne; inheritancecorrelation=0.5, round_generationnumber=false)
+gt = (@test_logs simulatecoalescent(rng, net, 1, 4, Ne; inheritancecorrelation=0.5, round_generationnumber=false))
+@test all( 0<e.length<1 for e in gt[1].edge )
 
 end

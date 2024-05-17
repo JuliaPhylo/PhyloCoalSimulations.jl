@@ -4,6 +4,7 @@ using Distributions
 using HypothesisTests
 using PhyloNetworks
 using Random
+using StableRNGs
 using Test
 const PN = PhyloNetworks
 const PCS = PhyloCoalSimulations
