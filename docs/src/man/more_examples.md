@@ -1,8 +1,9 @@
 ```@setup downstreamexamples
-using PhyloNetworks, PhyloCoalSimulations
-net = readTopology("((C:0.9,(B:0.2)#H1:0.7::0.6)I1:0.6,(#H1:0.6::0.4,A:1.0)I2:0.5)I3;");
-using Random; Random.seed!(261); # as in mapping block
-tree = simulatecoalescent(net,1,1; nodemapping=true)[1];
+using PhyloNetworks, PhyloCoalSimulations, StableRNGs
+net = readTopology("((C:0.9,(B:0.2)#H1:0.7::0.6)i1:0.6,(#H1:0.6::0.4,A:1.0)i2:0.5)i3;");
+using Random; Random.seed!(261) # for examples below that use default RNG
+rng = StableRNG(7); # as in mapping block
+tree = simulatecoalescent(rng, net,1,1; nodemapping=true)[1];
 ```
 # example uses
 
@@ -19,9 +20,9 @@ The number of deep coalescences can be quantified as the number of
 "extra" lineages due to incomplete lineage sorting, that can be calculated
 from embedding the gene tree into the species phylogeny
 (see [Maddison 1997](https://doi.org/10.1093/sysbio/46.3.523) for species trees).
-For an edge in the network, say edge 7 going from I2 to I3 going in back in time,
-lineage sorting is complete if all the gene lineages entering the edge (at I2)
-coalesce into a single gene lineage by the time they exit the edge (at I3).
+For an edge in the network, say edge 7 going from i2 to i3 going in back in time,
+lineage sorting is complete if all the gene lineages entering the edge (at i2)
+coalesce into a single gene lineage by the time they exit the edge (at i3).
 If they don't, the number of extra lineages is `k-1` where `k` is the number of
 lineages "exiting" the edge, for that particular edge in the species network
 and that particular gene tree.
@@ -53,9 +54,9 @@ edge_count
 
 From this, we see two interesting things.
 - 0 lineages exited edge number 3 in the species network: it's the hybrid
-  edge from H1 to I3 (going back in time). That's because the only lineage
-  at H1 was interited from I2, so there weren't any lineage evolving through edge 3.
-- 2 lineages exited edge number 7 (going from I2 to I3 back in time),
+  edge from H1 to i3 (going back in time). That's because the only lineage
+  at H1 was interited from i2, so there weren't any lineage evolving through edge 3.
+- 2 lineages exited edge number 7 (going from i2 to i3 back in time),
   so that's 1 extra lineage. All other edges look as expected, with a single
   gene lineage exiting from them.
 
@@ -90,7 +91,7 @@ If the gene trees have been saved to a file and later read from this file,
 then the `.inCycle` attributes are no longer stored in memory. In this case,
 we can retrieve the mapping information by the internal node names.
 The edges going through gene flow are those whose child node is named "H1"
-and parent node is named "I2".
+and parent node is named "i2".
 
 We use the first option with the `.inCycle` attribute below.
 We get that our one simulated gene tree was indeed inherited via gene flow:
@@ -98,9 +99,12 @@ We get that our one simulated gene tree was indeed inherited via gene flow:
 ```@repl downstreamexamples
 sum(e.inCycle == 5 for e in tree.edge) # or:
 sum(PCS.population_mappedto(e) == 5 for e in tree.edge)
-# or define a function to do this for any edge, so we can re-use later:
+```
+
+Next we define a function to do this for any edge, so we can re-use later:
+```@repl downstreamexamples
 nlineages_through(edgeID, gt) = sum(PCS.population_mappedto(e) == edgeID for e in gt.edge);
-nlineages_through(5, tree) # same as before!
+nlineages_through(5, tree) # same as before: now done via our new function
 nlineages_through(3, tree) # lineages that went through edge 3, the major edge.
 ```
 
@@ -120,8 +124,8 @@ genetrees = simulatecoalescent(net, ngenes, Dict("B"=>2, "A"=>1, "C"=>1); nodema
 length(genetrees)
 nlineages_geneflow = sum(nlineages_through(5,gt) for gt in genetrees)
 nlineages_major    = sum(nlineages_through(3,gt) for gt in genetrees)
-# realized γ, close to 0.4:
 proportion_geneflow = nlineages_geneflow / (nlineages_geneflow + nlineages_major)
+# realized γ, close to 0.4
 ```
 
 ## rate variation across species
@@ -139,11 +143,19 @@ distribution across species, that is, across edges in the species network.
 using Distributions
 lognormal_rate_dist = LogNormal(-0.125, 0.5) # μ = -σ²/2 to get a mean of 1.
 networkedge_rate = Dict(e.number => rand(lognormal_rate_dist) for e in net.edge)
-# add entry for the edge above the network's root. Find its number first.
+```
+
+Next we want to simulate a rate for the ancestral edge above the network's root.
+We find its number first, then add a entry to our dictionary of rates
+```@repl downstreamexamples
 rootedgenumber = PhyloCoalSimulations.get_rootedgenumber(net)
 push!(networkedge_rate, rootedgenumber => rand(lognormal_rate_dist))
 writeTopology(tree, round=true, digits=4) # before rate variation
-# multiply the length of each gene lineage by the rate of the species edge it maps into
+```
+
+Finally, we multiply the length of each gene lineage by the rate of
+the species edge it maps into:
+```@repl downstreamexamples
 for e in tree.edge
   e.length *= networkedge_rate[e.inCycle]
 end
