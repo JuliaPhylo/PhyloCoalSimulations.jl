@@ -1,7 +1,7 @@
 # notes to maintain documentation
 
 - built with [Documenter](https://juliadocs.github.io/Documenter.jl)
-- deployed [here](https://cecileane.github.io/PhyloCoalSimulations.jl/)
+- deployed [here](https://juliaphylo.github.io/PhyloCoalSimulations.jl/)
   (go to `dev/` or `stable/`)
   using github and files committed to the `gh-pages` branch.
 
