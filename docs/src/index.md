@@ -4,14 +4,14 @@ CurrentModule = PhyloCoalSimulations
 
 # PhyloCoalSimulations
 
-[PhyloCoalSimulations](https://github.com/cecileane/PhyloCoalSimulations.jl)
+[PhyloCoalSimulations](https://github.com/juliaphylo/PhyloCoalSimulations.jl)
 is a [Julia](http://julialang.org) package to
 simulate phylogenies under the coalescent.
-It depends on [PhyloNetworks](https://github.com/crsl4/PhyloNetworks.jl)
+It depends on [PhyloNetworks](https://github.com/juliaphylo/PhyloNetworks.jl)
 for the phylogenetic data structures, and manipulation of phylogenies.
 
 References:
-please see [bibtex entries here](https://github.com/cecileane/PhyloCoalSimulations.jl/blob/main/CITATION.bib).
+please see [bibtex entries here](https://github.com/juliaphylo/PhyloCoalSimulations.jl/blob/main/CITATION.bib).
 
 - for this package and the network coalescent model with inheritance correlation:\
   Fogg, Allman & Ané (2023).
@@ -21,7 +21,7 @@ please see [bibtex entries here](https://github.com/cecileane/PhyloCoalSimulatio
   72(5):1171–1179.
   [doi:10.1093/sysbio/syad030](https://doi.org/10.1093/sysbio/syad030).
 
-- for [PhyloNetworks](https://github.com/crsl4/PhyloNetworks.jl),
+- for [PhyloNetworks](https://github.com/juliaphylo/PhyloNetworks.jl),
   which this package depends on:\
   Solís-Lemus, Bastide & Ané (2017).
   PhyloNetworks: a package for phylogenetic networks.

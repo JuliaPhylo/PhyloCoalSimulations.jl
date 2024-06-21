@@ -9,7 +9,7 @@ makedocs(;
     sitename="PhyloCoalSimulations.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://cecileane.github.io/PhyloCoalSimulations.jl/stable/",
+        canonical="https://juliaphylo.github.io/PhyloCoalSimulations.jl/stable/",
         assets=String[],
     ),
     pages=[
@@ -29,7 +29,7 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/cecileane/PhyloCoalSimulations.jl",
+    repo="github.com/JuliaPhylo/PhyloCoalSimulations.jl",
     devbranch="main",
     push_preview = true,
 )
