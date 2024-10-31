@@ -12,3 +12,5 @@ message = "The gene and species phylogeny have different sets of node names"
 tree.node[1].name = "B"
 
 PCS.encode_edges!(tree,net)
+
+@test (x-> x.inCycle).(tree.edge) == [2,5,7,8,1,4,8,6,7,8,8]
