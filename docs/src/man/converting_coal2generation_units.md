@@ -2,7 +2,7 @@
 using PhyloNetworks, PhyloPlots, PhyloCoalSimulations, StableRNGs
 figpath = joinpath("..", "assets", "figures"); mkpath(figpath)
 figname(x) = joinpath(figpath, x)
-net = readTopology("((C:0.9,(B:0.2)#H1:0.7::0.6)i1:0.6,(#H1:0.6::0.4,A:1.0)i2:0.5)i3;");
+net = readnewick("((C:0.9,(B:0.2)#H1:0.7::0.6)i1:0.6,(#H1:0.6::0.4,A:1.0)i2:0.5)i3;");
 ```
 
 # converting between units
@@ -22,10 +22,10 @@ including the root edge.
 
 Here is an example using the same network and simulated gene tree as earlier.
 ```@repl converting
-writeTopology(net)
+writenewick(net)
 rng = StableRNG(7); # as in mapping section
 tree = simulatecoalescent(rng, net,1,1; nodemapping=true)[1];
-writeTopology(tree, round=true)
+writenewick(tree, round=true)
 ```
 ![example 1, same as in mapping section](../assets/figures/genetree_example1.svg)
 
@@ -39,12 +39,12 @@ rootedgenumber = PhyloCoalSimulations.get_rootedgenumber(net)
 push!(Ne, rootedgenumber => 1_000); # add Ne for the edge above the network's root
 Ne[6] = 10_000; # higher population size for the edge to species A
 Ne
-writeTopology(tree, round=true) # lengths in coalescent units: before unit conversion
+writenewick(tree, round=true) # lengths in coalescent units: before unit conversion
 # convert edge lengths in gene tree from coalescent units to # generations
 for e in tree.edge
-  e.length = round(e.length * Ne[e.inCycle]) # round: to get integers
+  e.length = round(e.length * Ne[e.inte1]) # round: to get integers
 end
-writeTopology(tree, round=true) # lengths in # of generations
+writenewick(tree, round=true) # lengths in # of generations
 ```
 
 Note that the simulation model assumes an infinite-Nₑ approximation,
@@ -68,7 +68,7 @@ then the coalescence rate on that edge is determined by the harmonic mean
 
 Let's assume we have a network with number of generations as edge lengths:
 ```@repl converting
-net_gen = readTopology("((C:900,(B:200)#H1:700::0.6)i1:600,(#H1:600::0.4,A:1000)i2:500)i3;");
+net_gen = readnewick("((C:900,(B:200)#H1:700::0.6)i1:600,(#H1:600::0.4,A:1000)i2:500)i3;");
 ```
 and that we have a dictionary listing the (harmonic mean) population
 size along each edge of the species network, and also along the root edge

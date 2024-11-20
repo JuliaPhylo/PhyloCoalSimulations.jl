@@ -38,7 +38,7 @@ and the plot shows the edge length values.
 
 ```@example getting_started
 using PhyloNetworks
-net = readTopology("((C:0.9,(B:0.2)#H1:0.7::0.6):0.6,(#H1:0.6,A:1):0.5);");
+net = readnewick("((C:0.9,(B:0.2)#H1:0.7::0.6):0.6,(#H1:0.6,A:1):0.5);");
 using PhyloPlots
 R"svg"(figname("net3taxa.svg"), width=6, height=3); # hide
 R"par"(mar=[.1,.1,.1,.1]); R"layout"([1 2]); # hide
@@ -105,7 +105,7 @@ for i in 1:2
   gt = trees[i]
   plot(gt, tipoffset=0.1,
            edgelabel=DataFrame(number = [e.number  for e in gt.edge],
-                               label  = [e.inCycle for e in gt.edge]));
+                               label  = [e.inte1 for e in gt.edge]));
   R"mtext"("gene $i", line=-1) # hide
 end
 R"mtext"("numbers: network edge each gene lineage maps to, at time of coalescence.\n8 = number of edge above the network root", side=1, line=-1, outer=true);  # hide
@@ -128,7 +128,7 @@ using a dictionary to map species to their number of individuals:
 
 ```@repl getting_started
 genetrees = simulatecoalescent(net, 1, Dict("A"=>2, "B"=>1, "C"=>1));
-writeTopology(genetrees[1])
+writenewick(genetrees[1])
 ```
 
 We can set 0 individuals within a species to simulate missing data.

@@ -6,7 +6,7 @@ edge or a node is mapped onto, or `nothing` if not mapped. For example,
 coalescent nodes in gene trees map to a *node* in the species phylogeny, instead
 of mapping to an *edge*.
 """
-population_mappedto(e::Union{PN.Edge,PN.Node}) = (e.inCycle == -1 ? nothing : e.inCycle)
+population_mappedto(e::Union{PN.Edge,PN.Node}) = (e.inte1 == -1 ? nothing : e.inte1)
 
 """
     ismappingnode(node)
