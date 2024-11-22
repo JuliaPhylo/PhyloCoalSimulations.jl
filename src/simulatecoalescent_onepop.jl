@@ -20,8 +20,8 @@ Output: nextlineageID, incremented by number of new lineages.
 
 In lineages, edge lengths are also considered in coalescent units.
 
-The newly created nodes and edges have their `.inCycle` attribute set to
-`populationID`, so as to track the mapping of gene lineages to populations
+The newly created nodes and edges have their `.intn1` & `.inte1` attributes set
+to `populationID`, so as to track the mapping of gene lineages to populations
 in the species phylogeny.
 
 # examples
@@ -98,19 +98,19 @@ end
 Create a coalescence between edges 1 and 2: with a new parent node
 `n` numbered `number` and a new parent edge `e`
 above the parent node, of length 0 and numbered `number`.
-Both `n.inCycle` and `e.inCycle` are set to `populationid`.
+Both `n.intn1` and `e.inte1` are set to `populationid`.
 """
 function coalescence_edge(e1,e2,number,populationid)
     parentnode = PN.Node(number, false, false, -1.0, [e1,e2],
-                false,false,false,false,false,false, populationid, # inCycle
+                false,false,false,false,false,false, populationid, # intn1
                 nothing,-1,-1,"")
-    push!(e1.node, parentnode) # isChild1 was true
+    push!(e1.node, parentnode) # ischild1 was true
     push!(e2.node, parentnode)
 
     parentedge = PN.Edge(number, 0.0,  # length
                 false, -1.0,-1.0, 1.0, # y,z,gamma
-                [parentnode],true,     # isChild1
-                true,populationid,     # inCycle
+                [parentnode],true,     # ischild1
+                true,populationid,     # inte1
                 true,true,false)
     push!(parentnode.edge, parentedge)
     return parentedge
@@ -129,11 +129,11 @@ function initializetip(species::AbstractString, individual::AbstractString,
                        populationid=-1)
     tipname = species * delim * individual
     tipnode = PN.Node(number,true, false, -1.0, PN.Edge[],
-                false,false,false,false,false,false, -1, # inCycle
+                false,false,false,false,false,false, -1, # intn1
                 nothing,-1,-1, tipname)
     tipedge = PN.Edge(number, 0.0, false, -1.0,-1.0, 1.0, # y,z,gamma
-                [tipnode],true,     # isChild1
-                true,populationid,  # inCycle
+                [tipnode],true,     # ischild1
+                true,populationid,  # inte1
                 true,true,false)
     push!(tipnode.edge, tipedge)
     return tipedge
@@ -149,7 +149,7 @@ If nindividuals is 1, then the leaf name is simply the species name.
 Otherwise, then the leaf names include the individual number and
 the default delimiter is `_`. For example, if the species name is `s`
 then leaf names are: `s_1`, `s_2`, etc. by default.  Pendant leaf
-edges have inCycle set to the number of the corresponding edge
+edges have inte1 set to the number of the corresponding edge
 in the species network.
 """
 function initializetipforest(speciesnode::PN.Node, nindividuals::Integer,
@@ -176,7 +176,7 @@ end
 Extend each incomplete edge in the forest with a new degree-2 node `n` and
 a new incomplete edge `e`, with the following information to map `n` and `e`
 into the species phylogeny:
-- `e.inCycle` is set to `populationid`, and
+- `e.inte1` is set to `populationid`, and
 - `n.name` is set to `population_node.name` if this name is non-empty, or
   `string(population_node.number)` otherwise (with any negative sign replaced
   by the string "minus").
@@ -191,7 +191,7 @@ Output: nextlineageID, incremented by the number of newly created degree-2 linea
 # example
 
 ```jldoctest
-julia> using PhyloNetworks; net = readTopology("(A:1,B:1);");
+julia> using PhyloNetworks; net = readnewick("(A:1,B:1);");
 
 julia> leafA = net.node[1]; edge2A_number = net.edge[1].number;
 
@@ -221,13 +221,13 @@ function map2population!(forest, pop_node, populationid, number)
     for i in eachindex(forest)
         e_old = forest[i]
         degree2node = PN.Node(number, false, false, -1.0, [e_old],
-                false,false,false,false,false,false, -1, # inCycle = -1: maps to population node, not population edgee
+                false,false,false,false,false,false, -1, # intn1 = -1: maps to population node, not population edgee
                 nothing,-1,-1, popnodename)
-        push!(e_old.node, degree2node) # isChild1 was set to true
+        push!(e_old.node, degree2node) # ischild1 was set to true
         e_new = PN.Edge(number, 0.0,   # length 0.0
                 false, -1.0,-1.0, 1.0, # y,z,gamma
-                [degree2node],true,    # isChild1
-                true,populationid,     # inCycle
+                [degree2node],true,    # ischild1
+                true,populationid,     # inte1
                 true,true,false)
         push!(degree2node.edge, e_new)
         forest[i] = e_new
@@ -250,7 +250,7 @@ end
     convert2tree!(rootnode)
 
 Return a network with all nodes and edges that can be reached from `rootnode`.
-**Warning**: Assumes that edges are correctly directed (with correct `isChild1`
+**Warning**: Assumes that edges are correctly directed (with correct `ischild1`
 attribute) and that the graph is a tree. This is *not* checked.
 
 If the root node is still attached to an incomplete root edge, this
@@ -260,16 +260,16 @@ function convert2tree!(rootnode::PN.Node)
     cleanrootnode!(rootnode)
     net = PN.HybridNetwork()
     push!(net.node, rootnode)
-    net.root = 1
-    net.isRooted = true
+    net.rooti = 1
+    net.isrooted = true
     for edge in rootnode.edge
         collect_edges_nodes!(net, edge)
     end
-    net.numNodes = length(net.node)
-    net.numEdges = length(net.edge)
-    length(Set(n.number for n in net.node)) == net.numNodes ||
+    net.numnodes = length(net.node)
+    net.numedges = length(net.edge)
+    length(Set(n.number for n in net.node)) == net.numnodes ||
         @error("node numbers are not all distinct")
-    length(Set(e.number for e in net.edge)) == net.numEdges ||
+    length(Set(e.number for e in net.edge)) == net.numedges ||
         @error("edge numbers are not all distinct")
     ntaxa = 0
     for nn in net.node # collect leaf names and # of leaves
@@ -282,7 +282,7 @@ function convert2tree!(rootnode::PN.Node)
         nn.name != "" || error("leaf without name")
         push!(net.leaf,  nn)
     end
-    net.numTaxa = ntaxa
+    net.numtaxa = ntaxa
     return net
 end
 function collect_edges_nodes!(net, parentedge)

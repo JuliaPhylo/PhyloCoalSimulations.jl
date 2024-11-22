@@ -18,9 +18,9 @@ First, it's useful to name internal nodes in the network, to which we
 can later map nodes in the gene tree.
 
 ```@repl mapping
-net = readTopology("((C:0.9,(B:0.2)#H1:0.7::0.6):0.6,(#H1:0.6,A:1):0.5);");
-PhyloNetworks.nameinternalnodes!(net, "i"); # "i" is a prefix to name internal nodes
-writeTopology(net)
+net = readnewick("((C:0.9,(B:0.2)#H1:0.7::0.6):0.6,(#H1:0.6,A:1):0.5);");
+nameinternalnodes!(net); # default prefix "i" to name internal nodes
+writenewick(net)
 ```
 
 Notice the extra node names in the species phylogeny: i1, i2, and i3 at the root.
@@ -34,10 +34,10 @@ We'll simulate a single tree here each time.
 ```@repl mapping
 using StableRNGs; rng = StableRNG(7); # to replicate randomness, but default RNG is better
 tree_regular = simulatecoalescent(rng, net,1,1)[1];
-writeTopology(tree_regular, round=true) # regular nodes only
+writenewick(tree_regular, round=true) # regular nodes only
 rng = StableRNG(7); # to replicate the same coalescent simulation
 tree = simulatecoalescent(rng, net,1,1; nodemapping=true)[1];
-writeTopology(tree, round=true) # extra degree-2 nodes for mapping
+writenewick(tree, round=true) # extra degree-2 nodes for mapping
 ```
 
 Notice that regular nodes in the gene tree (nodes that we get without the
@@ -55,10 +55,10 @@ plot(net, showedgenumber=true, shownodelabel=true, tipoffset=0.1);
 R"mtext"("species network", side=3, line=-1);  # hide
 R"mtext"("grey: population edge number", side=1, line=-1, cex=0.9);  # hide
 plot(tree, edgelabel=DataFrame(number=[e.number for e in tree.edge],
-                               label=[e.inCycle for e in tree.edge]),
+                               label=[e.inte1 for e in tree.edge]),
            edgelabelcolor="red4", shownodelabel=true, tipoffset=0.1);
 R"mtext"("gene tree", side=3, line=-1);  # hide
-R"mtext"("red (edge inCycle value): population a gene edge maps into", side=1, line=-2, cex=0.9); # hide
+R"mtext"("red (edge inte1 value): population a gene edge maps into", side=1, line=-2, cex=0.9); # hide
 R"mtext"("black (node names): speciation/reticulation a node maps to", side=1, line=-1, cex=0.9); # hide
 R"dev.off()" # hide
 nothing # hide

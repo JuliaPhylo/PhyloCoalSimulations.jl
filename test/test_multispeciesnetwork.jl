@@ -1,15 +1,15 @@
 @testset "multi-species network" begin
 
 # on a tree, method taking the default RNG
-net = PN.readTopology("(A:1,B:1);")
+net = PN.readnewick("(A:1,B:1);")
 Random.seed!(432)
 genetree = simulatecoalescent(net, 1, 2)
 @test length(genetree) == 1
-@test sort(tipLabels(genetree[1])) == ["A_1","A_2","B_1","B_2"]
+@test sort(tiplabels(genetree[1])) == ["A_1","A_2","B_1","B_2"]
 @test isempty(collect(PCS.mappingnodes(genetree[1])))
 # differing number of individuals / species
 genetree = simulatecoalescent(net, 1, Dict("A"=>2, "B"=>1))
-@test sort(tipLabels(genetree[1])) == ["A_1","A_2","B"]
+@test sort(tiplabels(genetree[1])) == ["A_1","A_2","B"]
 # nodemapping and related utilities
 genetree = simulatecoalescent(net, 1, 3; nodemapping=true)[1]
 tmp = map(n -> n.name, PCS.mappingnodes(genetree))
@@ -19,13 +19,13 @@ tmp = map(n -> n.name, PCS.mappingnodes(genetree))
 @test Set(unique(PCS.population_mappedto.(genetree.edge))) == Set((1,2,3))
 
 # on a network with hybrid ladder (and a 3_1-cycle). only t8 below reticulations
-net = PN.readTopology("((t5:1.228,((#H17:0.735::0.4)#H14:0.0,(t7:0.118,t2:0.118):1.095):0.014):0.384,(#H14:0.14::0.3,(t8:0.478)#H17:0.875):0.259);")
+net = PN.readnewick("((t5:1.228,((#H17:0.735::0.4)#H14:0.0,(t7:0.118,t2:0.118):1.095):0.014):0.384,(#H14:0.14::0.3,(t8:0.478)#H17:0.875):0.259);")
 Random.seed!(432)
 genetree = simulatecoalescent(net, 2, 1)
 @test length(genetree) == 2
 
-#= basic check on node names and inCycle values
-inCycle: numberID of net's edge that the node maps to for degree-3 nodes.
+#= basic check on node names and intn1 values
+intn1: numberID of net's edge that the node maps to for degree-3 nodes.
       -1 for nodes of degree 1 or 2 (which map to a node, not an edge)
       max(edge numberID)+1 for degree-3 nodes that map to the infinite root edge.
 name: name of numberID (as string) of net's node that the node maps to,
@@ -33,7 +33,7 @@ name: name of numberID (as string) of net's node that the node maps to,
 =#
 speciesedgenumbers = [e.number for e in net.edge]
 push!(speciesedgenumbers, maximum(speciesedgenumbers)+1)
-speciesleafnames = tipLabels(net)
+speciesleafnames = tiplabels(net)
 speciesintnodenames = String[]
 for n in net.node
     n.leaf && continue
@@ -49,13 +49,13 @@ function checknodeattributes(genetree)
     if degree == 1
         @test node.leaf
         @test replace(node.name, r"_\d*$" => "") in speciesleafnames # rm "_individualnumber" from tip name
-        @test node.inCycle == -1
+        @test node.intn1 == -1
     elseif degree == 2 && !isroot
         @test node.name in speciesintnodenames # degree-2 nodes have a name
-        @test node.inCycle == -1
+        @test node.intn1 == -1
     else # root (of degree 2) or degree == 3
         @test node.name == ""
-        @test node.inCycle in speciesedgenumbers
+        @test node.intn1 in speciesedgenumbers
     end
   end
   return nd2
@@ -70,17 +70,17 @@ gt2 = simulatecoalescent(rng, net, 1, 3; nodemapping=true)[1]
 ndegree2 = checknodeattributes(gt2)
 @test ndegree2 >= 9
 # check edge lengths: okay bc stable RNG
-@test writeTopology(gt2, round=true, digits=2) == "((((((t2_2:0.12)minus6:1.09)minus4:0.01)minus3:0.38)minus2:0.45,(((((t8_1:0.35,(t8_2:0.07,t8_3:0.07):0.28):0.13)H17:0.74)H14:0.14)minus7:0.26)minus2:0.45):0.55,(((((((t7_3:0.12)minus6:0.06,(t7_1:0.12)minus6:0.06):0.57,((t2_1:0.12)minus6:0.32,((t7_2:0.12)minus6:0.05,(t2_3:0.12)minus6:0.05):0.27):0.31):0.46)minus4:0.01)minus3:0.18,((t5_1:0.2,(t5_3:0.04,t5_2:0.04):0.16):1.03)minus3:0.18):0.2)minus2:1.0);"
+@test writenewick(gt2, round=true, digits=2) == "((((((t2_2:0.12)minus6:1.09)minus4:0.01)minus3:0.38)minus2:0.45,(((((t8_1:0.35,(t8_2:0.07,t8_3:0.07):0.28):0.13)H17:0.74)H14:0.14)minus7:0.26)minus2:0.45):0.55,(((((((t7_3:0.12)minus6:0.06,(t7_1:0.12)minus6:0.06):0.57,((t2_1:0.12)minus6:0.32,((t7_2:0.12)minus6:0.05,(t2_3:0.12)minus6:0.05):0.27):0.31):0.46)minus4:0.01)minus3:0.18,((t5_1:0.2,(t5_3:0.04,t5_2:0.04):0.16):1.03)minus3:0.18):0.2)minus2:1.0);"
 # fuse degree-2 nodes in gt2, then check that gt2 == gt1
 PN.removedegree2nodes!(gt2, true)
-@test hardwiredClusterDistance(gt1, gt2, true)==0
+@test hardwiredclustersdistance(gt1, gt2, true)==0
 
 #= simulate 1000 gene trees, 1 indiv/species, then check:
 - correct quartet CFs (approximately)
 - correct distribution of pairwise distances: mixture of shifted exponential(s)
 on same net as earlier (4-species net, but rotated)
 =#
-net = PN.readTopology("((t5:1.228,((t7:0.118,t2:0.118):1.095,(#H17:0.735::0.4)#H14:0.0::0.7):0.014):0.384,(#H14:0.14::0.3,(t8:0.478)#H17:0.875::0.6):0.259);")
+net = PN.readnewick("((t5:1.228,((t7:0.118,t2:0.118):1.095,(#H17:0.735::0.4)#H14:0.0::0.7):0.014):0.384,(#H14:0.14::0.3,(t8:0.478)#H17:0.875::0.6):0.259);")
 nsim = 1000
 rng = StableRNG(1602)
 genetrees = simulatecoalescent(rng, net, nsim, 1)
@@ -112,8 +112,8 @@ d_t2t8 = Float64[]
 =#
 d_t2t7 = Float64[]; d_t2t5 = Float64[]; d_t5t7 = Float64[]
 for tree in genetrees
-    distances = PN.pairwiseTaxonDistanceMatrix(tree)
-    o = sortperm(PN.tipLabels(tree)) # order to get taxa alphabetically: t2, t5, t7, t8
+    distances = PN.pairwisetaxondistancematrix(tree)
+    o = sortperm(PN.tiplabels(tree)) # order to get taxa alphabetically: t2, t5, t7, t8
     push!(d_t2t7, distances[o[1], o[3]])
     push!(d_t2t5, distances[o[1], o[2]])
     push!(d_t5t7, distances[o[2], o[3]])
@@ -125,7 +125,7 @@ expdist2 = Distributions.Exponential(2)
 @test pvalue(HypothesisTests.OneSampleADTest(d_t5t7 .- d_t5t7_min, expdist2)) >= α
 
 # on a tree with #generations + Ne dictionary
-net = PN.readTopology("(A:1000,B:1000);")
+net = PN.readnewick("(A:1000,B:1000);")
 Ne = Dict(1=>20, 2=>300, 3=>300)
 rng = StableRNG(639)
 genetree = simulatecoalescent(rng, net, 1, 2, Ne)[1]
@@ -151,7 +151,7 @@ end
 
 @testset "correlated inheritance" begin
 
-net = PN.readTopology("((((a:0.01)#H1:0.21::0.6,(#H1:0.1::0.4)#H3:0.11::0.6)i1:0.2)#H2:22.4::0.6,(#H2:11.1,#H3:11.41)i2:11.3)i3;")
+net = PN.readnewick("((((a:0.01)#H1:0.21::0.6,(#H1:0.1::0.4)#H3:0.11::0.6)i1:0.2)#H2:22.4::0.6,(#H2:11.1,#H3:11.41)i2:11.3)i3;")
 # plot(net, showedgelength=true, shownodelabel=true, useedgelength=true);
 rng = StableRNG(1234)
 res = simulatecoalescent(rng, net, 10, 2; inheritancecorrelation=0.99)
@@ -161,7 +161,7 @@ res = simulatecoalescent(rng, net, 10, 2; inheritancecorrelation=0.01)
 @test sum(all(e.length < 10 for e in t.edge) for t in res) <= 5
 # res = simulatecoalescent(net, 1, 5; inheritancecorrelation=0.99, nodemapping=true)[1]
 # plot(res, shownodelabel=true); # see identical mapping from the root to all tips
-net = PN.readTopology("((t:0.0)#H1:200::0.6,#H1:200)r;")
+net = PN.readnewick("((t:0.0)#H1:200::0.6,#H1:200)r;")
 tips_alltogether(n) = all(e -> e.length < 100, n.edge)
 rng = StableRNG(581)
 @testset "correlated inheritance" for rho in [0.8,0.3,0.1]
