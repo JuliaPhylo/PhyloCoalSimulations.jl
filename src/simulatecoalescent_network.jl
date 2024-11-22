@@ -76,13 +76,13 @@ julia> using Random; Random.seed!(54321); # for replicability of examples below
 
 julia> simulatecoalescent(net, 2, 1) # 2 gene trees, 1 individual/species
 2-element Vector{HybridNetwork}:
- PhyloNetworks.HybridNetwork, Rooted Network
+ HybridNetwork, Rooted Network
 2 edges
 3 nodes: 2 tips, 0 hybrid nodes, 1 internal tree nodes.
 tip labels: B, A
 (B:1.023,A:1.023);
 
- PhyloNetworks.HybridNetwork, Rooted Network
+ HybridNetwork, Rooted Network
 2 edges
 3 nodes: 2 tips, 0 hybrid nodes, 1 internal tree nodes.
 tip labels: B, A
@@ -90,7 +90,7 @@ tip labels: B, A
 
 
 julia> simulatecoalescent(net, 1, 3)[1] # 1 gene tree, 3 individuals/species
-PhyloNetworks.HybridNetwork, Rooted Network
+HybridNetwork, Rooted Network
 10 edges
 11 nodes: 6 tips, 0 hybrid nodes, 5 internal tree nodes.
 tip labels: B_2, B_1, B_3, A_3, ...
@@ -98,7 +98,7 @@ tip labels: B_2, B_1, B_3, A_3, ...
 
 
 julia> simulatecoalescent(net, 1, Dict("A"=>2, "B"=>1))[1] # 2 individuals in A, 1 in B
-PhyloNetworks.HybridNetwork, Rooted Network
+HybridNetwork, Rooted Network
 4 edges
 5 nodes: 3 tips, 0 hybrid nodes, 2 internal tree nodes.
 tip labels: B, A_2, A_1
