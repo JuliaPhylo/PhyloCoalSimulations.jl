@@ -84,7 +84,7 @@ When the `nodemapping` argument is used, the mapping of a gene tree within a spe
 is fully contained within the newick string of the gene tree.
 This mapping is encoded with the degree-2 node names as mentioned above. 
 Gene trees from `simulatecoalescent` also store the mapping for species edges
-in the `inCycle` field of gene tree edges; this information is 'lost' when a gene tree is written
+in the `inte1` field of gene tree edges; this information is 'lost' when a gene tree is written
 as a newick. However, we can re-encode this information with `encode_edges!`.
 We can see an example of re-encoding using the gene tree and network from above:
 
@@ -92,9 +92,9 @@ We can see an example of re-encoding using the gene tree and network from above:
 tree_newick = writeTopology(tree, round=true)
 tree = readTopology(tree_newick); # read the tree back from file
 
-(x-> (x.number,x.inCycle)).(tree.edge) #edge mappings are not present
+(x-> (x.number,x.inte1)).(tree.edge) #edge mappings are not present
 encode_edges!(tree,net)
-(x-> (x.number,x.inCycle)).(tree.edge) 
+(x-> (x.number,x.inte1)).(tree.edge) 
 
 ```
 

@@ -42,7 +42,7 @@ end
 function checknodeattributes(genetree)
   nd2 = 0 # number of degree-2 nodes in gene tree
   for node in genetree.node
-    isroot = node === genetree.node[genetree.root]
+    isroot = node === genetree.node[genetree.rooti]
     degree = length(node.edge)
     @test degree in [1,2,3]
     if degree == 2 nd2 += 1; end
@@ -73,7 +73,7 @@ ndegree2 = checknodeattributes(gt2)
 @test writenewick(gt2, round=true, digits=2) == "((((((t2_2:0.12)minus6:1.09)minus4:0.01)minus3:0.38)minus2:0.45,(((((t8_1:0.35,(t8_2:0.07,t8_3:0.07):0.28):0.13)H17:0.74)H14:0.14)minus7:0.26)minus2:0.45):0.55,(((((((t7_3:0.12)minus6:0.06,(t7_1:0.12)minus6:0.06):0.57,((t2_1:0.12)minus6:0.32,((t7_2:0.12)minus6:0.05,(t2_3:0.12)minus6:0.05):0.27):0.31):0.46)minus4:0.01)minus3:0.18,((t5_1:0.2,(t5_3:0.04,t5_2:0.04):0.16):1.03)minus3:0.18):0.2)minus2:1.0);"
 # fuse degree-2 nodes in gt2, then check that gt2 == gt1
 PN.removedegree2nodes!(gt2, true)
-@test hardwiredclustersdistance(gt1, gt2, true)==0
+@test hardwiredclusterdistance(gt1, gt2, true)==0
 
 #= simulate 1000 gene trees, 1 indiv/species, then check:
 - correct quartet CFs (approximately)
@@ -92,7 +92,7 @@ expCFminor = exp(-net.edge[4].length) * ((0.6 + 0.4*0.3)*exp(-net.edge[7].length
 =#
 expCFminor = 0.11039698101750112 # for t2t5|t7t8 and t2t8|t5t7
 expCF = [expCFminor, 1-2*expCFminor, expCFminor]
-obsCF, taxa = PN.countquartetsintrees(genetrees) # taxa alphabetically: t2,t5,t7,t8
+obsCF, taxa = SNaQ.countquartetsintrees(genetrees) # taxa alphabetically: t2,t5,t7,t8
 obsCF = Int.(obsCF[1].data[1:3]*nsim) # change format to what HypothesisTests expects
 qCFtest = HypothesisTests.ChisqTest(obsCF, expCF)
 @test pvalue(qCFtest) >= α

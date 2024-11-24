@@ -6,7 +6,8 @@ edge or a node is mapped onto, or `nothing` if not mapped. For example,
 coalescent nodes in gene trees map to a *node* in the species phylogeny, instead
 of mapping to an *edge*.
 """
-population_mappedto(e::Union{PN.Edge,PN.Node}) = (e.inte1 == -1 ? nothing : e.inte1)
+population_mappedto(e::PN.Node) = (e.intn1 == -1 ? nothing : e.intn1)
+population_mappedto(e::PN.Edge) = (e.inte1 == -1 ? nothing : e.inte1)
 
 """
     ismappingnode(node)
@@ -45,7 +46,7 @@ encode_edges!(gene tree, species tree)
 
 Given a gene tree with labeled internal nodes that map to a species phylogeny,
 this function maps each gene edge to the species edge that it is contained "within".
-Gene edge mappings are stored in the `inCycle` field of each gene tree `Edge`.
+Gene edge mappings are stored in the `inte1` field of each gene tree `Edge`.
 
 The `checknames` argument takes a boolean, and, if `true`, 
 then the function will check that both the species and the gene phylogeny
@@ -60,13 +61,13 @@ function encode_edges!(gene::PN.HybridNetwork,species::PN.HybridNetwork,checknam
         species_nodenames = push!((x->x.name).(species.node),"")
         !issetequal(species_nodenames,gene_nodenames) && error("The gene and species phylogeny have different sets of node names")
     end ##else assume only node corresponding to the species tree are named in the gene tree
-    gene.node[gene.root].name == "" && push!(search_nds,gene.node[gene.root]) ## if not named, also add the root as a starting point
+    gene.node[gene.rooti].name == "" && push!(search_nds,gene.node[gene.rooti]) ## if not named, also add the root as a starting point
 
     # dictionary that tracks all edges found within a given species edge
     # Species edges are defined by the named parent and child nodes
     edge_groups = Dict{Tuple{String,String},Vector{PhyloNetworks.Edge}}()
     edge_group_sp_names= (x->(PN.getparent(x).name,PN.getchild(x).name)).(species.edge)
-    push!(edge_group_sp_names,(gene.node[gene.root].name,species.node[species.root].name)) ## Add an edge group for the 'root edge' to handle coalescences beyond the species root. 
+    push!(edge_group_sp_names,(gene.node[gene.rooti].name,species.node[species.rooti].name)) ## Add an edge group for the 'root edge' to handle coalescences beyond the species root. 
     (x -> edge_groups[x]=Vector{PhyloNetworks.Edge}()).(edge_group_sp_names) # initialize edge groups with empty vectors. 
 
     for search_nd in search_nds 
@@ -88,11 +89,11 @@ function encode_edges!(gene::PN.HybridNetwork,species::PN.HybridNetwork,checknam
         append!(edge_groups[(search_nd.name,chld_name)],edge_group)
     end
 
-    inCycle_nos = (x-> x.number ).(species.edge)
-    inCycle_nos = push!(inCycle_nos,length(species.edge)+1)
-    for (number,e_names) in zip(inCycle_nos,edge_group_sp_names)
+    inte1_nos = (x-> x.number ).(species.edge)
+    inte1_nos = push!(inte1_nos,length(species.edge)+1)
+    for (number,e_names) in zip(inte1_nos,edge_group_sp_names)
         gene_edges = edge_groups[e_names]
-        (x-> x.inCycle = number).(gene_edges)
+        (x-> x.inte1 = number).(gene_edges)
     end
     return nothing
 end

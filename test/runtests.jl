@@ -6,6 +6,8 @@ using PhyloNetworks
 using Random
 using StableRNGs
 using Test
+using SNaQ
+
 const PN = PhyloNetworks
 const PCS = PhyloCoalSimulations
 
