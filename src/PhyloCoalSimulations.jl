@@ -8,6 +8,7 @@ const PN = PhyloNetworks # import PhyloNetworks as PN requires julia v1.6
 
 export
 simulatecoalescent,
+population_mappedto,
 encode_edges!
 
 include("simulatecoalescent_onepop.jl")

@@ -42,33 +42,52 @@ Base.eltype(::Type{mappingnodes}) = PN.Node
 
 
 """
-encode_edges!(gene tree, species tree)
+    encode_edges!(gene_tree, species_network, checknames=true)
 
-Given a gene tree with labeled internal nodes that map to a species phylogeny,
+Given a gene tree with labeled internal nodes that map to a species phylogeny
+(a species tree or a species network),
 this function maps each gene edge to the species edge that it is contained "within".
-Gene edge mappings are stored in the `inte1` field of each gene tree `Edge`.
+Gene edge mappings are stored in the `inte1` field of each gene tree edge,
+but it's best to access this mapping via [`population_mappedto`](@ref).
+
+Assumption: the `species_network` has unique node names to uniquely identify
+the speciation and reticulation events; and the `gene_tree` has degree-2 nodes
+with matching names, to indicate which species event each degree-2 node
+corresponds to.
 
 The `checknames` argument takes a boolean, and, if `true`, 
 then the function will check that both the species and the gene phylogeny
-have the same internal node names to create a mapping.
+have the same internal node names. The mapping of edges is recovered from
+matching names between nodes in the gene tree and nodes in the species network.
 """
-
-function encode_edges!(gene::PN.HybridNetwork,species::PN.HybridNetwork,checknames=true::Bool)
-    #Get all named non-leaf nodes on the gene tree.
-    search_nds = gene.node[(x->x.name != "" && !x.leaf).(gene.node)] ##These are the  nodes that we will traverse for edge groups
+function encode_edges!(
+    gene::PN.HybridNetwork,
+    species::PN.HybridNetwork,
+    checknames::Bool=true
+)
+    # get all named non-leaf nodes in the gene tree: nodes to traverse for edge groups
+    search_nds = gene.node[(x->x.name != "" && !x.leaf).(gene.node)]
     if checknames
         gene_nodenames = (x->x.name).(gene.node)
         species_nodenames = push!((x->x.name).(species.node),"")
-        !issetequal(species_nodenames,gene_nodenames) && error("The gene and species phylogeny have different sets of node names")
-    end ##else assume only node corresponding to the species tree are named in the gene tree
-    gene.node[gene.rooti].name == "" && push!(search_nds,gene.node[gene.rooti]) ## if not named, also add the root as a starting point
+        species_nodename_set = Set(species_nodenames)
+        length(species_nodenames) == length(species_nodename_set) ||
+            error("The species phylogeny does not a unique name for each node")
+        issetequal(species_nodename_set, gene_nodenames) ||
+            error("The gene and species phylogeny have different sets of node names")
+    end
+    # if the root has no name, also add the root as a starting point
+    generoot = PN.getroot(gene)
+    generoot.name == "" && push!(search_nds, generoot)
 
     # dictionary that tracks all edges found within a given species edge
     # Species edges are defined by the named parent and child nodes
     edge_groups = Dict{Tuple{String,String},Vector{PhyloNetworks.Edge}}()
     edge_group_sp_names= (x->(PN.getparent(x).name,PN.getchild(x).name)).(species.edge)
-    push!(edge_group_sp_names,(gene.node[gene.rooti].name,species.node[species.rooti].name)) ## Add an edge group for the 'root edge' to handle coalescences beyond the species root. 
-    (x -> edge_groups[x]=Vector{PhyloNetworks.Edge}()).(edge_group_sp_names) # initialize edge groups with empty vectors. 
+    # add an edge group for the 'root edge' to handle coalescences above the species root
+    push!(edge_group_sp_names,(generoot.name, PN.getroot(species).name))
+    # initialize edge groups with empty vectors
+    (x -> edge_groups[x]=Vector{PhyloNetworks.Edge}()).(edge_group_sp_names)
 
     for search_nd in search_nds 
         nd_group = PN.getchildren(search_nd) # The nodes found within an edge group

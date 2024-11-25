@@ -41,7 +41,7 @@ julia> using Random; Random.seed!(7690);
 julia> PhyloCoalSimulations.simulatecoal_onepopulation!(forest, Inf, 3);
 
 julia> PhyloCoalSimulations.convert2tree!(forest[1].node[1])
-HybridNetwork, Rooted Network
+PhyloNetworks.HybridNetwork, Rooted Network
 2 edges
 3 nodes: 2 tips, 0 hybrid nodes, 1 internal tree nodes.
 tip labels: s2, s1

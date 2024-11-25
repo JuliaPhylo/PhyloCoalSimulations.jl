@@ -34,7 +34,7 @@ species edge using the degree-2 mapping nodes,
 then count how many lineages are "extra". We do so below using utilities
 [`mappingnodes`](@ref PhyloCoalSimulations.mappingnodes)
 to iterate over degree-2 mapping nodes and
-[`population_mappedto`](@ref PhyloCoalSimulations.population_mappedto)
+[`population_mappedto`](@ref)
 to extract the mapping information.
 
 ```@repl downstreamexamples
@@ -43,7 +43,7 @@ edge_count = Dict(e.number => 0 for e in net.edge)
 const PCS = PhyloCoalSimulations; # for lazy typing!
 for n in PCS.mappingnodes(tree)  # iterate over degree-2 mapping nodes in the gene tree
   child = getchildedge(n)
-  popid = PCS.population_mappedto(child) # number of species edge that 'n' came from
+  popid = population_mappedto(child) # number of species edge that 'n' came from
   # sanity check below
   isnothing(popid) && error("""population ID not found for the child edge of
                     node number $(n.number) mapping to species node $(n.name).""")
@@ -80,7 +80,7 @@ To do so, we can count the number of gene lineages that are mapped to each
 hybrid edge in the network.
 
 This mapping is stored in the edge attribute `.inte1` internally,
-but it's best to access it via the function [`population_mappedto`](@ref PhyloCoalSimulations.population_mappedto)
+but it's best to access it via the function [`population_mappedto`](@ref)
 (as the internal representation may change).
 From the plot above, the minor "gene flow" edge is edge number 5 and the
 major hybrid edge has number 3.
@@ -98,12 +98,12 @@ We get that our one simulated gene tree was indeed inherited via gene flow:
 
 ```@repl downstreamexamples
 sum(e.inte1 == 5 for e in tree.edge) # or:
-sum(PCS.population_mappedto(e) == 5 for e in tree.edge)
+sum(population_mappedto(e) == 5 for e in tree.edge)
 ```
 
 Next we define a function to do this for any edge, so we can re-use later:
 ```@repl downstreamexamples
-nlineages_through(edgeID, gt) = sum(PCS.population_mappedto(e) == edgeID for e in gt.edge);
+nlineages_through(edgeID, gt) = sum(population_mappedto(e) == edgeID for e in gt.edge);
 nlineages_through(5, tree) # same as before: now done via our new function
 nlineages_through(3, tree) # lineages that went through edge 3, the major edge.
 ```

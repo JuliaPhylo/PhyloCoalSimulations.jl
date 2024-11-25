@@ -78,26 +78,38 @@ network like this:
   before coalescing with the ancestor of the other lineages (which have already
   coalesced by then).
 
-## encoding species edges back onto gene trees
+## mapping gene tree edges back into species edges
 
 When the `nodemapping` argument is used, the mapping of a gene tree within a species phylogeny
 is fully contained within the newick string of the gene tree.
-This mapping is encoded with the degree-2 node names as mentioned above. 
+This mapping is encoded with the degree-2 node names as mentioned above.
 Gene trees from `simulatecoalescent` also store the mapping for species edges
-in the `inte1` field of gene tree edges; this information is 'lost' when a gene tree is written
-as a newick. However, we can re-encode this information with `encode_edges!`.
-We can see an example of re-encoding using the gene tree and network from above:
+in the `inte1` field of gene tree edges. This information is 'lost' when a gene
+tree is written in newick format. However, we can re-encode this information
+with `encode_edges!`.
+We can see an example of re-encoding using the gene tree and network from above.
+Let's focus, for example, on the edge that the hybrid lineage inherited from,
+whose child node has name "H1"
 
 ```@repl mapping
-tree_newick = writeTopology(tree, round=true)
-tree = readTopology(tree_newick); # read the tree back from file
-
-(x-> (x.number,x.inte1)).(tree.edge) #edge mappings are not present
-encode_edges!(tree,net)
-(x-> (x.number,x.inte1)).(tree.edge) 
-
+e_index = findfirst(e -> getchild(e).name == "H1", tree.edge)
+e = tree.edge[e_index]
+population_mappedto(e) # edge 'e' evolved within edge 5 in the species network
 ```
 
+Next we write our gene tree and read it back from the newick string,
+see that the mapping of edges was "lost",
+and how to recover it using [`encode_edges!`](@ref):
+```@repl mapping
+tree_newick = writeTopology(tree)
+tree = readTopology(tree_newick); # read the tree back from the newick string
+# next: find the edge above H1, as before
+e_index = findfirst(e -> getchild(e).name == "H1", tree.edge) # may have changed
+e = tree.edge[e_index]
+population_mappedto(e) # nothing: edge mapping was "lost"
+encode_edges!(tree, net)
+population_mappedto(e) # edge 5 in the species network: the mapping was recovered
+```
 
 ## cleaning gene trees
 
@@ -108,6 +120,6 @@ But we may want to "clean" gene trees of their degree-2 nodes at some point.
 This can be done with the `PhyloNetworks` utility `removedegree2nodes!`, like this:
 
 ```@repl mapping
-PhyloNetworks.removedegree2nodes!(tree, true)
+removedegree2nodes!(tree, true)
 ```
 The option `true` is to keep the root, even if it's of degree 2.

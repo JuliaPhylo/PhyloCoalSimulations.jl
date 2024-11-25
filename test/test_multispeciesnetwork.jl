@@ -14,9 +14,9 @@ genetree = simulatecoalescent(net, 1, Dict("A"=>2, "B"=>1))
 genetree = simulatecoalescent(net, 1, 3; nodemapping=true)[1]
 tmp = map(n -> n.name, PCS.mappingnodes(genetree))
 @test !isempty(tmp) && all(tmp .== "minus2")
-@test Set(unique(PCS.population_mappedto.(PN.getchildedge.(PCS.mappingnodes(genetree))))) == Set((1,2))
-@test Set(unique(PCS.population_mappedto.(genetree.node))) == Set((1,2,3,nothing))
-@test Set(unique(PCS.population_mappedto.(genetree.edge))) == Set((1,2,3))
+@test Set(unique(population_mappedto.(PN.getchildedge.(PCS.mappingnodes(genetree))))) == Set((1,2))
+@test Set(unique(population_mappedto.(genetree.node))) == Set((1,2,3,nothing))
+@test Set(unique(population_mappedto.(genetree.edge))) == Set((1,2,3))
 
 # on a network with hybrid ladder (and a 3_1-cycle). only t8 below reticulations
 net = PN.readnewick("((t5:1.228,((#H17:0.735::0.4)#H14:0.0,(t7:0.118,t2:0.118):1.095):0.014):0.384,(#H14:0.14::0.3,(t8:0.478)#H17:0.875):0.259);")
