@@ -86,7 +86,7 @@ This mapping is encoded with the degree-2 node names as mentioned above.
 Gene trees from `simulatecoalescent` also store the mapping for species edges
 in the `inte1` field of gene tree edges. This information is 'lost' when a gene
 tree is written in newick format. However, we can re-encode this information
-with `encode_edges!`.
+with `gene_edgemapping!`.
 We can see an example of re-encoding using the gene tree and network from above.
 Let's focus, for example, on the edge that the hybrid lineage inherited from,
 whose child node has name "H1"
@@ -99,7 +99,7 @@ population_mappedto(e) # edge 'e' evolved within edge 5 in the species network
 
 Next we write our gene tree and read it back from the newick string,
 see that the mapping of edges was "lost",
-and how to recover it using [`encode_edges!`](@ref):
+and how to recover it using [`gene_edgemapping!`](@ref):
 ```@repl mapping
 tree_newick = writeTopology(tree)
 tree = readTopology(tree_newick); # read the tree back from the newick string
@@ -107,7 +107,7 @@ tree = readTopology(tree_newick); # read the tree back from the newick string
 e_index = findfirst(e -> getchild(e).name == "H1", tree.edge) # may have changed
 e = tree.edge[e_index]
 population_mappedto(e) # nothing: edge mapping was "lost"
-encode_edges!(tree, net)
+gene_edgemapping!(tree, net)
 population_mappedto(e) # edge 5 in the species network: the mapping was recovered
 ```
 

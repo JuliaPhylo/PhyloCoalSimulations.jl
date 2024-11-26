@@ -42,7 +42,7 @@ Base.eltype(::Type{mappingnodes}) = PN.Node
 
 
 """
-    encode_edges!(gene_tree, species_network, checknames=true)
+    gene_edgemapping!(gene_tree, species_network, checknames=true)
 
 Given a gene tree with labeled internal nodes that map to a species phylogeny
 (a species tree or a species network),
@@ -60,7 +60,7 @@ then the function will check that both the species and the gene phylogeny
 have the same internal node names. The mapping of edges is recovered from
 matching names between nodes in the gene tree and nodes in the species network.
 """
-function encode_edges!(
+function gene_edgemapping!(
     gene::PN.HybridNetwork,
     species::PN.HybridNetwork,
     checknames::Bool=true
