@@ -10,5 +10,5 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
 Distributions = "0.25"
-PhyloNetworks = "0.17"
+PhyloNetworks = "0.17, 1"
 julia = "1.5"
