@@ -1,6 +1,6 @@
 ```@setup downstreamexamples
 using PhyloNetworks, PhyloCoalSimulations, StableRNGs
-net = readTopology("((C:0.9,(B:0.2)#H1:0.7::0.6)i1:0.6,(#H1:0.6::0.4,A:1.0)i2:0.5)i3;");
+net = readnewick("((C:0.9,(B:0.2)#H1:0.7::0.6)i1:0.6,(#H1:0.6::0.4,A:1.0)i2:0.5)i3;");
 using Random; Random.seed!(261) # for examples below that use default RNG
 rng = StableRNG(7); # as in mapping block
 tree = simulatecoalescent(rng, net,1,1; nodemapping=true)[1];
@@ -9,8 +9,8 @@ tree = simulatecoalescent(rng, net,1,1; nodemapping=true)[1];
 
 We are re-using the same network and simulated tree as before:
 ```@repl downstreamexamples
-writeTopology(net)
-writeTopology(tree, round=true)
+writenewick(net)
+writenewick(tree, round=true)
 ```
 ![example 1, same as in mapping section](../assets/figures/genetree_example1.svg)
 
@@ -34,7 +34,7 @@ species edge using the degree-2 mapping nodes,
 then count how many lineages are "extra". We do so below using utilities
 [`mappingnodes`](@ref PhyloCoalSimulations.mappingnodes)
 to iterate over degree-2 mapping nodes and
-[`population_mappedto`](@ref PhyloCoalSimulations.population_mappedto)
+[`population_mappedto`](@ref)
 to extract the mapping information.
 
 ```@repl downstreamexamples
@@ -43,7 +43,7 @@ edge_count = Dict(e.number => 0 for e in net.edge)
 const PCS = PhyloCoalSimulations; # for lazy typing!
 for n in PCS.mappingnodes(tree)  # iterate over degree-2 mapping nodes in the gene tree
   child = getchildedge(n)
-  popid = PCS.population_mappedto(child) # number of species edge that 'n' came from
+  popid = population_mappedto(child) # number of species edge that 'n' came from
   # sanity check below
   isnothing(popid) && error("""population ID not found for the child edge of
                     node number $(n.number) mapping to species node $(n.name).""")
@@ -79,31 +79,31 @@ from each parent at H1, realized in the gene trees we actually simulated.
 To do so, we can count the number of gene lineages that are mapped to each
 hybrid edge in the network.
 
-This mapping is stored in the edge attribute `.inCycle` internally,
-but it's best to access it via the function [`population_mappedto`](@ref PhyloCoalSimulations.population_mappedto)
+This mapping is stored in the edge attribute `.inte1` internally,
+but it's best to access it via the function [`population_mappedto`](@ref)
 (as the internal representation may change).
 From the plot above, the minor "gene flow" edge is edge number 5 and the
 major hybrid edge has number 3.
 So we can count the gene lineages inherited via gene flow
-as the number of gene tree edges with `inCycle` equal to 5.
+as the number of gene tree edges with `inte1` equal to 5.
 
 If the gene trees have been saved to a file and later read from this file,
-then the `.inCycle` attributes are no longer stored in memory. In this case,
+then the `.inte1` attributes are no longer stored in memory. In this case,
 we can retrieve the mapping information by the internal node names.
 The edges going through gene flow are those whose child node is named "H1"
 and parent node is named "i2".
 
-We use the first option with the `.inCycle` attribute below.
+We use the first option with the `.inte1` attribute below.
 We get that our one simulated gene tree was indeed inherited via gene flow:
 
 ```@repl downstreamexamples
-sum(e.inCycle == 5 for e in tree.edge) # or:
-sum(PCS.population_mappedto(e) == 5 for e in tree.edge)
+sum(e.inte1 == 5 for e in tree.edge) # or:
+sum(population_mappedto(e) == 5 for e in tree.edge)
 ```
 
 Next we define a function to do this for any edge, so we can re-use later:
 ```@repl downstreamexamples
-nlineages_through(edgeID, gt) = sum(PCS.population_mappedto(e) == edgeID for e in gt.edge);
+nlineages_through(edgeID, gt) = sum(population_mappedto(e) == edgeID for e in gt.edge);
 nlineages_through(5, tree) # same as before: now done via our new function
 nlineages_through(3, tree) # lineages that went through edge 3, the major edge.
 ```
@@ -150,14 +150,14 @@ We find its number first, then add a entry to our dictionary of rates
 ```@repl downstreamexamples
 rootedgenumber = PhyloCoalSimulations.get_rootedgenumber(net)
 push!(networkedge_rate, rootedgenumber => rand(lognormal_rate_dist))
-writeTopology(tree, round=true, digits=4) # before rate variation
+writenewick(tree, round=true, digits=4) # before rate variation
 ```
 
 Finally, we multiply the length of each gene lineage by the rate of
 the species edge it maps into:
 ```@repl downstreamexamples
 for e in tree.edge
-  e.length *= networkedge_rate[e.inCycle]
+  e.length *= networkedge_rate[e.inte1]
 end
-writeTopology(tree, round=true, digits=4) # after rate variation
+writenewick(tree, round=true, digits=4) # after rate variation
 ```

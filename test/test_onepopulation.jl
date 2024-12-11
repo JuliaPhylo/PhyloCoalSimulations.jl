@@ -29,6 +29,6 @@ testgenetree = (VERSION < v"1.6"  ?   "(s1:0.5,s2:0.5);" : # for julia v1.5
     ( v"1.7" <= VERSION < v"1.10-" ? "(s2:0.9,s1:0.9);" :   # for julia v1.7-v1.9
     "random genetree depends on RNG")) # for later: not used, switched to StableRNG
 testgenetree = "(s1:0.8,s2:0.8);"
-@test PN.writeTopology(net, round=true, digits=1) == testgenetree
+@test PN.writenewick(net, round=true, digits=1) == testgenetree
 
 end

@@ -10,4 +10,4 @@ StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
 
 [compat]
 Documenter = "1"
-PhyloPlots = "1"
+PhyloPlots = "1,2"

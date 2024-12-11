@@ -59,7 +59,7 @@ The effect of inheritance correlation can be seen on this species network
 with a single species "A" from which we will sample 6 individuals:
 
 ```@example correlated
-net = readTopology("((A:0.0)#H1:3::0.6,#H1:3)root;")
+net = readnewick("((A:0.0)#H1:3::0.6,#H1:3)root;")
 using RCall # hide
 R"svg"(figname("net1taxon.svg"), width=3, height=2); # hide
 R"par"(mar=[0,0,0,0]); # hide
@@ -83,7 +83,7 @@ gt3 = simulatecoalescent(net, 1, 6; inheritancecorrelation=0.99, nodemapping=tru
 using DataFrames
 speciespath(phy) = DataFrame(
     number = [e.number  for e in phy.edge],
-    label  = [e.inCycle for e in phy.edge]
+    label  = [e.inte1 for e in phy.edge]
 )
 el1 = speciespath(gt1); el2 = speciespath(gt2); el3 = speciespath(gt3);
 

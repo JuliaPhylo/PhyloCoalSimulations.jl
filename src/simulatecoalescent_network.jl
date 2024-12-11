@@ -26,25 +26,26 @@ number of individuals to be simulated for each species.
 If `nodemapping` is true, each simulated gene tree is augmented with
 degree-2 nodes that can be mapped to speciation or hybridization events.
 The mapping of gene tree nodes & edges to network edges is carried
-by the `.inCycle` attribute. The mapping of gene tree nodes to network nodes
+by their attribute `.intn1` (for nodes) and `.inte1` (for edges).
+The mapping of gene tree nodes to network nodes
 is carried by the `.name` attribute. Namely:
 
 - A degree-3 node (1 parent + 2 children) represents a coalescent event
-  that occurred along a population *edge* in `net`. Its `.inCycle` attribute
+  that occurred along a population *edge* in `net`. Its `.intn1` attribute
   is set to the number of that network population edge.
-  Its parent edge has its `.inCycle` attribute also set to the number of
+  Its parent edge has its `.inte1` attribute also set to the number of
   the population edge that it originated from.
 - The gene tree's root node (of degree 2) represents a coalescent event
   along the network's root edge.
-  Its `.inCycle` attribute is the number assigned to the network's root edge,
+  Its `.intn1` attribute is the number assigned to the network's root edge,
   which is set by [`get_rootedgenumber`](@ref) as the maximum edge number + 1.
 - A leaf (or degree-1 node) represents an individual. It maps to a species
   in `net`. The individual leaf name is set to the species name
   if `nindividuals` is 1. Otherwise, its name is set to `speciesname_i`
   where `i` is the individual number in that species.
-  Its `inCycle` attribute is the default `-1`.
+  Its `intn1` attribute is the default `-1`.
 - A non-root degree-2 node represents a speciation or hybridization and maps
-  to a population *node* in `net`. Its `inCycle` attribute is the default `-1`.
+  to a population *node* in `net`. Its `intn1` attribute is the default `-1`.
   Its name is set to network node name, if it exists. If the network node
   has no name, the gene tree node is given a name built from the network node
   number.
@@ -70,7 +71,7 @@ Assumptions:
 ```jldoctest simcoal
 julia> using PhyloNetworks
 
-julia> net = readTopology("(A:1,B:1);"); # branch lengths of 1 coalescent unit
+julia> net = readnewick("(A:1,B:1);"); # branch lengths of 1 coalescent unit
 
 julia> using Random; Random.seed!(54321); # for replicability of examples below
 
@@ -119,35 +120,36 @@ julia> rng = StableRNG(791);
 
 julia> tree1 = simulatecoalescent(rng, net,2,2; nodemapping=true)[1]; # first gene tree only
 
-julia> writeTopology(tree1, round=true)
+julia> writenewick(tree1, round=true)
 "(((B_2:0.82,B_1:0.82):0.18)minus2:0.992,((A_1:1.0)minus2:0.427,(A_2:1.0)minus2:0.427):0.565);"
 
-julia> PhyloNetworks.nameinternalnodes!(net, "i"); writeTopology(net)
+julia> nameinternalnodes!(net); writenewick(net)
 "(A:1.0,B:1.0)i1;"
 
-julia> tree1 = simulatecoalescent(rng, net,2,2; nodemapping=true)[1]; writeTopology(tree1, round=true)
+julia> tree1 = simulatecoalescent(rng, net,2,2; nodemapping=true)[1]; writenewick(tree1, round=true)
 "((B_2:1.0)i1:0.621,((B_1:1.0)i1:0.018,((A_1:0.61,A_2:0.61):0.39)i1:0.018):0.604);"
 
-julia> printNodes(net)
-node leaf  hybrid hasHybEdge name inCycle edges'numbers
-1    true  false  false      A    -1      1   
-2    true  false  false      B    -1      2   
--2   false false  false      i1   -1      1    2   
+julia> printnodes(net)
+node leaf  hybrid name i_cycle edges'numbers
+1    true  false  A    -1      1   
+2    true  false  B    -1      2   
+-2   false false  i1   -1      1    2   
 
-julia> printNodes(tree1)
-node leaf  hybrid hasHybEdge name inCycle edges'numbers
-10   false false  false           3       8    9   
-8    false false  false      i1   -1      5    8   
-5    true  false  false      B_2  -1      5   
-9    false false  false           3       7    6    9   
-7    false false  false      i1   -1      4    7   
-4    true  false  false      B_1  -1      4   
-6    false false  false      i1   -1      3    6   
-3    false false  false           1       1    2    3   
-1    true  false  false      A_1  -1      1   
-2    true  false  false      A_2  -1      2   
+julia> printnodes(tree1)
+node leaf  hybrid name i_cycle edges'numbers
+10   false false       3       8    9   
+8    false false  i1   -1      5    8   
+5    true  false  B_2  -1      5   
+9    false false       3       7    6    9   
+7    false false  i1   -1      4    7   
+4    true  false  B_1  -1      4   
+6    false false  i1   -1      3    6   
+3    false false       1       1    2    3   
+1    true  false  A_1  -1      1   
+2    true  false  A_2  -1      2   
 
-julia> [(tree_edge_number = e.number, pop_edge_number = e.inCycle) for e in tree1.edge]
+julia> [(tree_edge_number = e.number,
+         pop_edge_number = population_mappedto(e)) for e in tree1.edge]
 9-element Vector{@NamedTuple{tree_edge_number::Int64, pop_edge_number::Int64}}:
  (tree_edge_number = 8, pop_edge_number = 3)
  (tree_edge_number = 5, pop_edge_number = 2)
@@ -172,7 +174,7 @@ function simulatecoalescent(
     inheritancecorrelation=0.0
 )
     if isa(nindividuals, AbstractDict)
-        issubset(PN.tipLabels(net), keys(nindividuals)) || error("nindividuals is missing some species")
+        issubset(PN.tiplabels(net), keys(nindividuals)) || error("nindividuals is missing some species")
         valtype(nindividuals) <: Integer || error("nindividuals should be integers")
     elseif isa(nindividuals, Integer)
         nindividuals = Dict(n.name => nindividuals for n in net.leaf)
@@ -190,11 +192,11 @@ function simulatecoalescent(
     PN.preorder!(net)
     node2forest = Dict(n.number => PN.Edge[] for n in net.node)
     edge2forest = Dict(e.number => PN.Edge[] for e in net.edge)
-    parentedges = Vector{PN.Edge}[] # parentedge[i] = vector of edges parent to node i in "nodes_changed"
+    parentedges = Vector{PN.Edge}[] # parentedge[i] = vector of edges parent to node i in "vec_node"
     childedges = Vector{PN.Edge}[]
     nnodes = length(net.node)
     for nodei in 1:nnodes
-        nn = net.nodes_changed[nodei]
+        nn = net.vec_node[nodei]
         parentedgelist = PN.Edge[]
         childedgelist = PN.Edge[]
         for e in nn.edge
@@ -215,7 +217,7 @@ function simulatecoalescent(
         end
         nextid = 1 # number for the next node & its parent edge, to be created in gene tree
         for nodei in nnodes:-1:1
-            nn = net.nodes_changed[nodei]
+            nn = net.vec_node[nodei]
             parentedgelist = parentedges[nodei] # parent population(s)
             nparents = length(parentedgelist)
             if nn.leaf
@@ -324,7 +326,7 @@ calculated as `g=uNₑ` and then rounded to be an integer, unless
 ```jldoctest
 julia> using PhyloNetworks
 
-julia> net = readTopology("(A:500,B:500);"); # branch lengths of 100 generations
+julia> net = readnewick("(A:500,B:500);"); # branch lengths of 100 generations
 
 julia> Ne = Dict(e.number => 1_000 for e in net.edge);
 
@@ -380,7 +382,7 @@ function simulatecoalescent(
     # convert lengths to #generations in gene trees
     for gt in genetreelist
         for e in gt.edge
-            len = e.length * Neff[e.inCycle]
+            len = e.length * Neff[e.inte1]
             e.length = (round_generationnumber ? round(len) : len )
         end
         nodemapping || PN.removedegree2nodes!(gt, true) # 'true' option requires PN v0.15.1
