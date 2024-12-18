@@ -34,7 +34,8 @@ is carried by the `.name` attribute. Namely:
   that occurred along a population *edge* in `net`. Its `.intn1` attribute
   is set to the number of that network population edge.
   Its parent edge has its `.inte1` attribute also set to the number of
-  the population edge that it originated from.
+  the population edge that it originated from. This internal coding could in
+  future version: retrieve it with [`population_mappedto`](@ref).
 - The gene tree's root node (of degree 2) represents a coalescent event
   along the network's root edge.
   Its `.intn1` attribute is the number assigned to the network's root edge,
@@ -343,7 +344,7 @@ julia> using Random; Random.seed!(54321); # for replicability of example below
 
 julia> genetrees = simulatecoalescent(net, 2, 1, Ne);
 
-julia> writeMultiTopology(genetrees, stdout) # branch lengths: number of generations
+julia> writemultinewick(genetrees, stdout) # branch lengths: number of generations
 (B:546.0,A:546.0);
 (B:3155.0,A:3155.0);
 
@@ -382,7 +383,7 @@ function simulatecoalescent(
     # convert lengths to #generations in gene trees
     for gt in genetreelist
         for e in gt.edge
-            len = e.length * Neff[e.inte1]
+            len = e.length * Neff[population_mappedto(e)]
             e.length = (round_generationnumber ? round(len) : len )
         end
         nodemapping || PN.removedegree2nodes!(gt, true) # 'true' option requires PN v0.15.1

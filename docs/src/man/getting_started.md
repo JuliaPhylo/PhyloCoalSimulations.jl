@@ -84,8 +84,8 @@ We can work with these gene trees within Julia with downstream code,
 and/or we can save them to a file:
 
 ```@repl getting_started
-writeMultiTopology(trees, stdout) # write them to standout output (screen here)
-writeMultiTopology(trees, "genetrees.phy") # warning: will overwrite "genetrees.phy" if this file existed
+writemultinewick(trees, stdout) # write them to standout output (screen here)
+writemultinewick(trees, "genetrees.phy") # warning: will overwrite "genetrees.phy" if this file existed
 rm("genetrees.phy") # hide
 ```
 
@@ -105,7 +105,7 @@ for i in 1:2
   gt = trees[i]
   plot(gt, tipoffset=0.1,
            edgelabel=DataFrame(number = [e.number  for e in gt.edge],
-                               label  = [e.inte1 for e in gt.edge]));
+                               label  = [population_mappedto(e) for e in gt.edge]));
   R"mtext"("gene $i", line=-1) # hide
 end
 R"mtext"("numbers: network edge each gene lineage maps to, at time of coalescence.\n8 = number of edge above the network root", side=1, line=-1, outer=true);  # hide
@@ -135,5 +135,5 @@ We can set 0 individuals within a species to simulate missing data.
 
 ```@repl getting_started
 genetrees = simulatecoalescent(net, 3, Dict("A"=>2, "B"=>1, "C"=>0));
-writeMultiTopology(genetrees, stdout)
+writemultinewick(genetrees, stdout)
 ```

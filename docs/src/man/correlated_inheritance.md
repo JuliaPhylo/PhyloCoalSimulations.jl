@@ -83,7 +83,7 @@ gt3 = simulatecoalescent(net, 1, 6; inheritancecorrelation=0.99, nodemapping=tru
 using DataFrames
 speciespath(phy) = DataFrame(
     number = [e.number  for e in phy.edge],
-    label  = [e.inte1 for e in phy.edge]
+    label  = [population_mappedto(e) for e in phy.edge]
 )
 el1 = speciespath(gt1); el2 = speciespath(gt2); el3 = speciespath(gt3);
 

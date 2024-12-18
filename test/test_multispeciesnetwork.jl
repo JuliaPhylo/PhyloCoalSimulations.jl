@@ -42,7 +42,7 @@ end
 function checknodeattributes(genetree)
   nd2 = 0 # number of degree-2 nodes in gene tree
   for node in genetree.node
-    isroot = node === genetree.node[genetree.rooti]
+    isroot = node === getroot(genetree)
     degree = length(node.edge)
     @test degree in [1,2,3]
     if degree == 2 nd2 += 1; end

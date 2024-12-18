@@ -55,10 +55,10 @@ plot(net, showedgenumber=true, shownodelabel=true, tipoffset=0.1);
 R"mtext"("species network", side=3, line=-1);  # hide
 R"mtext"("grey: population edge number", side=1, line=-1, cex=0.9);  # hide
 plot(tree, edgelabel=DataFrame(number=[e.number for e in tree.edge],
-                               label=[e.inte1 for e in tree.edge]),
+                               label=[population_mappedto(e) for e in tree.edge]),
            edgelabelcolor="red4", shownodelabel=true, tipoffset=0.1);
 R"mtext"("gene tree", side=3, line=-1);  # hide
-R"mtext"("red (edge inte1 value): population a gene edge maps into", side=1, line=-2, cex=0.9); # hide
+R"mtext"("red: population a gene edge maps into (grey in net)", side=1, line=-2, cex=0.9); # hide
 R"mtext"("black (node names): speciation/reticulation a node maps to", side=1, line=-1, cex=0.9); # hide
 R"dev.off()" # hide
 nothing # hide
@@ -84,9 +84,9 @@ When the `nodemapping` argument is used, the mapping of a gene tree within a spe
 is fully contained within the newick string of the gene tree.
 This mapping is encoded with the degree-2 node names as mentioned above.
 Gene trees from `simulatecoalescent` also store the mapping for species edges
-in the `inte1` field of gene tree edges. This information is 'lost' when a gene
-tree is written in newick format. However, we can re-encode this information
-with `gene_edgemapping!`.
+in the `inte1` internal attribute of gene tree edges.
+This information is 'lost' when a gene tree is written in newick format.
+However, we can re-encode this information with [`gene_edgemapping!`](@ref).
 We can see an example of re-encoding using the gene tree and network from above.
 Let's focus, for example, on the edge that the hybrid lineage inherited from,
 whose child node has name "H1"
@@ -101,8 +101,8 @@ Next we write our gene tree and read it back from the newick string,
 see that the mapping of edges was "lost",
 and how to recover it using [`gene_edgemapping!`](@ref):
 ```@repl mapping
-tree_newick = writeTopology(tree)
-tree = readTopology(tree_newick); # read the tree back from the newick string
+tree_newick = writenewick(tree)
+tree = readnewick(tree_newick); # read the tree back from the newick string
 # next: find the edge above H1, as before
 e_index = findfirst(e -> getchild(e).name == "H1", tree.edge) # may have changed
 e = tree.edge[e_index]
