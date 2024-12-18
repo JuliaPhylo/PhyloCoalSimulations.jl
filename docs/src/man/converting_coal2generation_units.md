@@ -42,7 +42,7 @@ Ne
 writenewick(tree, round=true) # lengths in coalescent units: before unit conversion
 # convert edge lengths in gene tree from coalescent units to # generations
 for e in tree.edge
-  e.length = round(e.length * Ne[e.inte1]) # round: to get integers
+  e.length = round(e.length * Ne[population_mappedto(e)]) # round: to get integers
 end
 writenewick(tree, round=true) # lengths in # of generations
 ```
@@ -112,7 +112,7 @@ convenience wrapper function that takes **Nₑ as an extra input** to:
 
 ```@repl converting
 genetree_gen = simulatecoalescent(net_gen,3,1, Ne; nodemapping=true);
-writeMultiTopology(genetree_gen, stdout) # 3 gene trees, lengths in #generations
+writemultinewick(genetree_gen, stdout) # 3 gene trees, lengths in #generations
 ```
 
 !!! warning

@@ -85,19 +85,23 @@ but it's best to access it via the function [`population_mappedto`](@ref)
 From the plot above, the minor "gene flow" edge is edge number 5 and the
 major hybrid edge has number 3.
 So we can count the gene lineages inherited via gene flow
-as the number of gene tree edges with `inte1` equal to 5.
+as the number of gene tree edges with `population_mappedto(edge)` equal to 5.
 
 If the gene trees have been saved to a file and later read from this file,
-then the `.inte1` attributes are no longer stored in memory. In this case,
-we can retrieve the mapping information by the internal node names.
-The edges going through gene flow are those whose child node is named "H1"
-and parent node is named "i2".
+then they no longer have the internal attributes that store the population
+each edge arose from.
+But we can retrieve this mapping information from the internal node names.
+For example, the edges going through gene flow are those whose child node is
+named "H1" and parent node is named "i2".
+To recover the internal edge attributes, use [`gene_edgemapping!`](@ref) as
+described in section
+"[mapping gene tree edges back into species edges](@ref)".
 
-We use the first option with the `.inte1` attribute below.
+We assume below that the internal edge attribute are up-to-date (as when gene
+trees were simulated just before).
 We get that our one simulated gene tree was indeed inherited via gene flow:
 
 ```@repl downstreamexamples
-sum(e.inte1 == 5 for e in tree.edge) # or:
 sum(population_mappedto(e) == 5 for e in tree.edge)
 ```
 
@@ -157,7 +161,7 @@ Finally, we multiply the length of each gene lineage by the rate of
 the species edge it maps into:
 ```@repl downstreamexamples
 for e in tree.edge
-  e.length *= networkedge_rate[e.inte1]
+  e.length *= networkedge_rate[population_mappedto(e)]
 end
 writenewick(tree, round=true, digits=4) # after rate variation
 ```
