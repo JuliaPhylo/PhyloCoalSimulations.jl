@@ -12,10 +12,12 @@ population_mappedto(e::PN.Edge) = (e.inte1 == -1 ? nothing : e.inte1)
 """
     ismappingnode(node)
 
-Boolean: true if `node` is of degree 2, has a single child, and has a name.
-(The root is of degree-2 but is not a mapping node).
+Boolean: true if `node` is has a single child, and has a name.
+Nodes mapping to a species tree node are those that satisfy these conditions.
+They are typically of degree 2, except for the gene tree root, which is of
+degree 1 if it maps to the network's root (rather than being older).
 """
-ismappingnode(n::PN.Node) = length(n.edge) == 2 && PN.hassinglechild(n) && n.name != ""
+ismappingnode(n::PN.Node) = PN.hassinglechild(n) && n.name != ""
 
 """
     mappingnodes(gene tree)

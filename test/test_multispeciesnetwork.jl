@@ -171,6 +171,13 @@ end
 # in Ne, and option to not round #generations in gene tree
 Ne=0.1
 gt = (@test_logs simulatecoalescent(rng, net, 1, 4, Ne; inheritancecorrelation=0.5, round_generationnumber=false))
-@test all( 0<e.length<1 for e in gt[1].edge )
+@test all( 0<e.length<1 for (i,e) in enumerate(gt[1].edge) if i>1 )
+# first edge = root edge back to network root: very long
 
+# degree-1 root in gene tree due to all coalescences between network's root
+rng = StableRNG(91)
+tre = simulatecoalescent(rng, net, 1, 2; nodemapping=true)[1]
+@test writenewick(tre, round=true, digits=1) == "(((t_1:0.0)H1:1.7,(t_2:0.0)H1:1.7):198.3)r;"
+removedegree2nodes!(tre, true)
+@test writenewick(tre, round=true, digits=1) == "((t_1:1.7,t_2:1.7):198.3)r;"
 end
