@@ -14,12 +14,14 @@ coalescent process, with possible correlated inheritance if
 `inheritancecorrelation > 0`: see [`simulatecoalescent`](@ref).
 Note that ancestors in some fixed ancestral population are
 different individuals across different loci.
+Branch lengths in the network are interpreted to be in coalescent units.
 
 For each locus, `Y` at individuals in the origin population `P0`, taken to be
 the root of the network, is sampled from `P0_distribution`.
 Given state `y0` at the start of an edge in the gene tree,
 the trait value `yt` at the end of the edge is sampled from
-`transition_distribution_family(y0,t)` where `t` is the edge length.
+`transition_distribution_family(y0,t)` where `t` is the edge length,
+in coalescent units.
 
 Output:`(X, tiplabels, genetrees)` where
 - `X` is a vector of matrices, of length `nrep`: one matrix for each independent
