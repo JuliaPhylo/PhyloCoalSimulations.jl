@@ -2,9 +2,11 @@ using PhyloCoalSimulations
 
 using Distributions
 using HypothesisTests
+using LinearAlgebra: diag
 using PhyloNetworks
 using Random
 using StableRNGs
+using Statistics
 using Test
 
 const PN = PhyloNetworks

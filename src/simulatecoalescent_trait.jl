@@ -1,8 +1,8 @@
 """
-function simulate_polygenictrait([rng::AbstractRNG,] net, nrep, nloci,
-    P0_distribution::Distribution, transition_distribution_family;
-    nindividuals=1, inheritancecorrelation=0.0)
-)
+    function simulate_polygenictrait([rng::AbstractRNG,] net, nrep, nloci,
+        P0_distribution::Distribution, transition_distribution_family;
+        nindividuals=1, inheritancecorrelation=0.0)
+    )
 
 Simulate a polygenetic trait controlled by multiple additive loci, each with
 effect `Yi`: `X = (Y_1+...+ Y_nloci)/sqrt(nloci)`.
