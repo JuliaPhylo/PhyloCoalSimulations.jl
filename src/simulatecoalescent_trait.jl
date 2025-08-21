@@ -43,19 +43,32 @@ and a Brownian motion for each locus (along its own gene tree).
 ```jldoctest polytrait
 julia> net = readnewick("((B:.5,A:.5):1.5,O:2)r;");
 
-julia> using Distributions; root_prior = NormalCanon(0, 100) # μ=0, σ²=1/100: σ=0.1
+julia> using Distributions; root_prior = NormalCanon(0, 100); # μ=0, σ²=1/100: σ=0.1
 
-julia> transition_distribution(x,t) = Normal(x, 0.1*sqrt(t))
+julia> transition_distribution(x,t) = Normal(x, 0.1*sqrt(t));
 
-julia> x,lab,gt = simulate_polygenictrait(net, 2, 1, root_prior, transition_distribution);
+julia> using StableRNGs; rng = StableRNG(791); # reproducible across julia versions
+
+julia> x,lab,gt = simulate_polygenictrait(rng, # 'rng' can be omitted
+           net, 2, 1, # 2 reps, 1 locus only
+           root_prior, transition_distribution);
+
+julia> using DataFrames
 
 julia> DataFrame(species=lab, rep1=x[1][:], rep2=x[2][:])
+3×3 DataFrame
+ Row │ species  rep1       rep2       
+     │ String   Float64    Float64    
+─────┼────────────────────────────────
+   1 │ B        -0.142115  -0.0144998
+   2 │ A         0.162518  -0.0736928
+   3 │ O        -0.122352  -0.222733
 ```
 
 The next example uses a binary 0/1 trait at each locus, and a Markov transition
 for each locus (again, along its own gene tree).
 ```jldoctest polytrait
-julia> root_prior = Binomial(1, 0.3) # has minor allele? minor frequency 0.3
+julia> root_prior = Binomial(1, 0.3); # has minor allele? minor frequency 0.3
 
 julia> function transition_distribution(x,t)
            prob_nochange = exp(-0.1*t) # substitution rate: 0.1 / coalescent unit
@@ -64,7 +77,18 @@ julia> function transition_distribution(x,t)
            return Binomial(1, minorprob)
        end;
 
-julia> x,lab,gt = simulate_polygenictrait(net, 1, 5, root_prior, transition_distribution);
+julia> x,lab,gt = simulate_polygenictrait(rng, # rng for reproducibility only
+          net, 1, 5, # 1 replicate, 5 loci: trait = (# minor alleles) / sqrt(5)
+          root_prior, transition_distribution);
+
+julia> hcat(lab, x[1])
+3×2 Matrix{Any}:
+ "B"  0.894427
+ "A"  1.34164
+ "O"  0.894427
+
+julia> writenewick(gt[1], round=true) # gene tree for locus 1
+"((O:2.0)r:1.059,(((A:0.5)i1:0.178,(B:0.5)i1:0.178):1.322)r:1.059);"
 ```
 """
 function simulate_polygenictrait(net::PN.HybridNetwork, args...; kwargs...)

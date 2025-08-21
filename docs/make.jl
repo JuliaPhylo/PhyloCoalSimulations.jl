@@ -1,7 +1,11 @@
 using PhyloCoalSimulations
 using Documenter
 
-DocMeta.setdocmeta!(PhyloCoalSimulations, :DocTestSetup, :(using PhyloCoalSimulations); recursive=true)
+DocMeta.setdocmeta!(
+    PhyloCoalSimulations,
+    :DocTestSetup,
+    :(using PhyloNetworks; using PhyloCoalSimulations);
+    recursive=true)
 
 makedocs(;
     modules=[PhyloCoalSimulations],
