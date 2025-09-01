@@ -38,6 +38,7 @@ Pages = [
     "man/converting_coal2generation_units.md",
     "man/correlated_inheritance.md",
     "man/more_examples.md",
+    "man/polygenic_traits.md",
 ]
 Depth = 3
 ```
