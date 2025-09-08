@@ -127,7 +127,9 @@ julia> writenewick(tree1, round=true)
 julia> nameinternalnodes!(net); writenewick(net)
 "(A:1.0,B:1.0)i1;"
 
-julia> tree1 = simulatecoalescent(rng, net,2,2; nodemapping=true)[1]; writenewick(tree1, round=true)
+julia> tree1 = simulatecoalescent(rng, net,2,2; nodemapping=true)[1];
+
+julia> writenewick(tree1, round=true)
 "((B_2:1.0)i1:0.621,((B_1:1.0)i1:0.018,((A_1:0.61,A_2:0.61):0.39)i1:0.018):0.604);"
 
 julia> printnodes(net)
@@ -281,10 +283,10 @@ function simulatecoalescent(
             else # nparents = 0: infinite root population
                 # f can have a single edge if a displayed tree's MRCA is strictly below the root,
                 #   or if the network root has a single child
+                if nodemapping
+                    nextid = map2population!(f, nn, rootedgenumber, nextid)
+                end
                 if length(f) > 1
-                    if nodemapping
-                        nextid = map2population!(f, nn, rootedgenumber, nextid)
-                    end
                     nextid = simulatecoal_onepopulation!(rng, f, Inf, nextid, rootedgenumber)
                 end
                 rootnode = f[1].node[1]
@@ -316,6 +318,10 @@ using the infinite-population-size approximation.
 Output: vector of gene trees with edge lengths in number of generations,
 calculated as `g=uNₑ` and then rounded to be an integer, unless
 `round_generationnumber` is false.
+
+Note that in each gene tree `t`, the nodes (and edges) are listed in post-order,
+that is, `t.node[1]` is the root of the tree, and each node is lister after
+its parent.
 
 !!! warning
     When `populationsize` Nₑ is not provided as input, all edge lengths are in

@@ -1,7 +1,11 @@
 using PhyloCoalSimulations
 using Documenter
 
-DocMeta.setdocmeta!(PhyloCoalSimulations, :DocTestSetup, :(using PhyloCoalSimulations); recursive=true)
+DocMeta.setdocmeta!(
+    PhyloCoalSimulations,
+    :DocTestSetup,
+    :(using PhyloNetworks; using PhyloCoalSimulations);
+    recursive=true)
 
 makedocs(;
     modules=[PhyloCoalSimulations],
@@ -19,7 +23,8 @@ makedocs(;
             "mapping gene trees into the species network" => "man/mapping_genetree_to_network.md",
             "converting between units" => "man/converting_coal2generation_units.md",
             "correlated inheritance" => "man/correlated_inheritance.md",
-            "more examples" => "man/more_examples.md",
+            "more gene tree examples" => "man/more_examples.md",
+            "traits along gene trees" => "man/polygenic_traits.md"
         ],
         "library" => [
             "public" => "lib/public.md",

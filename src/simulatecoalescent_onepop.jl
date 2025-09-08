@@ -249,9 +249,14 @@ end
 """
     convert2tree!(rootnode)
 
-Return a network with all nodes and edges that can be reached from `rootnode`.
-**Warning**: Assumes that edges are correctly directed (with correct `ischild1`
-attribute) and that the graph is a tree. This is *not* checked.
+Return a HybridNetwork object `tree` with all nodes and edges that can be
+reached from `rootnode`. Its nodes (and edges) are already post-ordered,
+that is, `tree.node` lists all the nodes such that the first one is the root,
+and if `v` is a descendant of `u`, then `v` is listed after `u`.
+
+**Warning**: edges that can be reached from `rootnodes` are assumed to be
+correctly directed (with correct `ischild1` attribute) and that the
+graph is a tree. This is *not* checked.
 
 If the root node is still attached to an incomplete root edge, this
 edge & node are first disconnected.
