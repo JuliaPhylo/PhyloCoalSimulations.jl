@@ -95,7 +95,7 @@ Next we pick parameters:
 `μ=1.5` mutations per coalescent unit (aka, per 2N generations where
 2N is the haploid effective population size),
 `σ=2` for the mutation effects,
-and the equilibrium variance at the root population: `μσ²`
+and the equilibrium variance at the root population: `μσ²`.
 
 ```@repl polygenictrait
 μ=1.5; σ=2; rootdist = Normal(0, sqrt(μ)*σ);

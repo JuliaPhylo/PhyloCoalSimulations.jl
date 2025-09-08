@@ -16,12 +16,17 @@ Note that ancestors in some fixed ancestral population are
 different individuals across different loci.
 Branch lengths in the network are interpreted to be in coalescent units.
 
-For each locus, `Y` at individuals in the origin population `P0`, taken to be
-the root of the network, is sampled from `P0_distribution`.
+We take `P0` to be the origin population at the root of the network.
+For each locus, the trait effect `Y` at individuals in `P0`
+is sampled from `P0_distribution`.
 Given state `y0` at the start of an edge in the gene tree,
 the trait value `yt` at the end of the edge is sampled from
 `transition_distribution_family(y0,t)` where `t` is the edge length,
 in coalescent units.
+
+Note that the simulated trait can be multivariate.
+In this case, `P0_distribution` and `transition_distribution_family(y0,t)`
+should be multivariate distribution of the same dimension.
 
 Output:`(X, tiplabels, genetrees)` where
 - `X` is a vector of matrices, of length `nrep`: one matrix for each independent
@@ -63,6 +68,36 @@ julia> DataFrame(species=lab, rep1=x[1][:], rep2=x[2][:])
    1 │ B        -0.142115  -0.0144998
    2 │ A         0.162518  -0.0736928
    3 │ O        -0.122352  -0.222733
+```
+
+This same example can be made multivariate, here with dimension 3.
+```jldoctest polytrait
+julia> Using LinearAlgebra; # for matrices
+
+julia> P = [5.0  0.0  0.5; 0.0  10.0  3.2; 0.5  3.2  7.0]; # symmetric
+
+julia> root_prior = MvNormalCanon([0,0,0], P0); # μ=[0,0,0], Σ=P⁻¹
+
+julia> transition_distribution(x,t) = MvNormal(x, 0.1*sqrt(t).*I);
+
+julia> using StableRNGs; rng = StableRNG(791); # reproducible across julia versions
+
+julia> x,lab,gt = simulate_polygenictrait(rng, # 'rng' can be omitted
+           net, 1, 4, # 1 reps, 4 loci
+           root_prior, transition_distribution,
+           nindividuals = Dict("A"=>1, "B"=>2, "O"=>1)); # 2 individuals in B
+
+julia> using DataFrames
+
+julia> DataFrame(species=lab, dim1=x[1][:,1], dim2=x[1][:,2], dim3=x[1][:,3])
+4×4 DataFrame
+ Row │ species  dim1      dim2       dim3         
+     │ String   Float64   Float64    Float64      
+─────┼────────────────────────────────────────────
+   1 │ B_1      1.01356   -0.57434    0.000166408
+   2 │ B_2      1.18012   -0.36646    0.506656
+   3 │ A        0.694887  -0.597059   0.191692
+   4 │ O        0.916683  -0.73294   -0.409072
 ```
 
 The next example uses a binary 0/1 trait at each locus, and a Markov transition
@@ -221,7 +256,7 @@ function simulate_locuseffect_at!(
     end
     node.booln5 = true
     if node.leaf
-        Y[lab2index[node.name]] = nodeY
+        Y[lab2index[node.name],:] .= nodeY # broadcast if univariate
     else
         simulate_locuseffect_below!(rng, Y, lab2index, node,
             transition_kernel, nodeY, storeY)
@@ -246,7 +281,7 @@ function simulate_locuseffect_at!(
     end
     child.booln5 = true
     if child.leaf
-        Y[lab2index[child.name]] = childY
+        Y[lab2index[child.name],:] .= childY # broadcast if univariate
     else
         simulate_locuseffect_below!(rng, Y, lab2index, child,
             transition_kernel, childY, storeY)

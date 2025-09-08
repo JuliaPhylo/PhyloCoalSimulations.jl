@@ -47,6 +47,7 @@ _,lab,gt = simulate_polygenictrait(net,1,1,rootprior,transition;
 @test length(gt) == 1
 @test all(n.booln5 for n in gt[1].node)
 @test all(n.fvalue != -1 for n in gt[1].node)
+@test_throws "integer" simulate_polygenictrait(net,1,1,rootprior,transition; nindividuals=1.2);
 
 # 100 replicates, 1 locus, 3 individuals, 1 taxon + 2-cycle above it
 ell = 2.0; # in coalescent units
@@ -103,5 +104,15 @@ extrema(diag(empcov) ./ repeat(cT, inner=2) .- 1.0)
 maximum(abs.(LinearAlgebra.tril(empcov - repeat(cM, inner=(2,2)), -1)))
 # 0.0071099844807377575: good
 =#
+
+# 3 taxa, multivariate
+P0 = [5.0  0.0  0.5; 0.0  10.0  3.2; 0.5  3.2  7.0]
+rootprior = MvNormalCanon([0, 0, 0], P0)
+transition(x,t) = MvNormal(x, sqrt(t).*[1 0 0; 0 1 0; 0 0 1])
+net = readnewick("((((B:.5,A:.5):1.5,O:2):1)r);");
+X,_,_ = simulate_polygenictrait(net,5,10,rootprior,transition;
+    nindividuals=Dict("A"=>1, "B"=>2, "O"=>2, "extra"=>10));
+@test length(X) == 5
+@test size(X[2]) == (5,3)
 
 end
