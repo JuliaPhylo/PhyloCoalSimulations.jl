@@ -70,36 +70,6 @@ julia> DataFrame(species=lab, rep1=x[1][:], rep2=x[2][:])
    3 │ O        -0.122352  -0.222733
 ```
 
-This same example can be made multivariate, here with dimension 3.
-```jldoctest polytrait
-julia> Using LinearAlgebra; # for matrices
-
-julia> P = [5.0  0.0  0.5; 0.0  10.0  3.2; 0.5  3.2  7.0]; # symmetric
-
-julia> root_prior = MvNormalCanon([0,0,0], P0); # μ=[0,0,0], Σ=P⁻¹
-
-julia> transition_distribution(x,t) = MvNormal(x, 0.1*sqrt(t).*I);
-
-julia> using StableRNGs; rng = StableRNG(791); # reproducible across julia versions
-
-julia> x,lab,gt = simulate_polygenictrait(rng, # 'rng' can be omitted
-           net, 1, 4, # 1 reps, 4 loci
-           root_prior, transition_distribution,
-           nindividuals = Dict("A"=>1, "B"=>2, "O"=>1)); # 2 individuals in B
-
-julia> using DataFrames
-
-julia> DataFrame(species=lab, dim1=x[1][:,1], dim2=x[1][:,2], dim3=x[1][:,3])
-4×4 DataFrame
- Row │ species  dim1      dim2       dim3         
-     │ String   Float64   Float64    Float64      
-─────┼────────────────────────────────────────────
-   1 │ B_1      1.01356   -0.57434    0.000166408
-   2 │ B_2      1.18012   -0.36646    0.506656
-   3 │ A        0.694887  -0.597059   0.191692
-   4 │ O        0.916683  -0.73294   -0.409072
-```
-
 The next example uses a binary 0/1 trait at each locus, and a Markov transition
 for each locus (again, along its own gene tree).
 ```jldoctest polytrait
@@ -124,6 +94,32 @@ julia> hcat(lab, x[1])
 
 julia> writenewick(gt[1], round=true) # gene tree for locus 1
 "((O:2.0)r:1.059,(((A:0.5)i1:0.178,(B:0.5)i1:0.178):1.322)r:1.059);"
+```
+
+This first example can be made multivariate, here with dimension 3.
+```jldoctest polytrait
+julia> using LinearAlgebra; # for matrices
+
+julia> P = [5.0  0.0  0.5; 0.0  10.0  3.2; 0.5  3.2  7.0]; # symmetric
+
+julia> root_prior = MvNormalCanon([0,0,0], P); # μ=[0,0,0], Σ=P⁻¹
+
+julia> transition_distribution_mv(x,t) = MvNormal(x, 0.1*sqrt(t).*I);
+
+julia> x,lab,gt = simulate_polygenictrait(rng, # 'rng' can be omitted
+           net, 1, 4, # 1 reps, 4 loci
+           root_prior, transition_distribution_mv,
+           nindividuals = Dict("A"=>1, "B"=>2, "O"=>1)); # 2 individuals in B
+
+julia> DataFrame(species=lab, dim1=x[1][:,1], dim2=x[1][:,2], dim3=x[1][:,3])
+4×4 DataFrame
+ Row │ species  dim1        dim2       dim3       
+     │ String   Float64     Float64    Float64    
+─────┼────────────────────────────────────────────
+   1 │ B_1      -0.382887   -0.753835  -0.083225
+   2 │ B_2       0.268128   -0.567099  -0.0537401
+   3 │ A        -0.808516   -0.670528   0.406368
+   4 │ O        -0.0156142  -0.588951  -0.11002
 ```
 """
 function simulate_polygenictrait(net::PN.HybridNetwork, args...; kwargs...)
