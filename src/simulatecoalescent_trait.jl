@@ -24,9 +24,9 @@ the trait value `yt` at the end of the edge is sampled from
 `transition_distribution_family(y0,t)` where `t` is the edge length,
 in coalescent units.
 
-Note that the simulated trait can be multivariate.
+The simulated trait can be multivariate.
 In this case, `P0_distribution` and `transition_distribution_family(y0,t)`
-should be multivariate distribution of the same dimension.
+should be multivariate distributions of the same dimension.
 
 Output:`(X, tiplabels, genetrees)` where
 - `X` is a vector of matrices, of length `nrep`: one matrix for each independent
@@ -48,7 +48,9 @@ and a Brownian motion for each locus (along its own gene tree).
 ```jldoctest polytrait
 julia> net = readnewick("((B:.5,A:.5):1.5,O:2)r;");
 
-julia> using Distributions; root_prior = NormalCanon(0, 100); # μ=0, σ²=1/100: σ=0.1
+julia> using Distributions;
+
+julia> root_distribution = NormalCanon(0, 100); # μ=0, σ²=1/100: σ=0.1
 
 julia> transition_distribution(x,t) = Normal(x, 0.1*sqrt(t));
 
@@ -56,7 +58,7 @@ julia> using StableRNGs; rng = StableRNG(791); # reproducible across julia versi
 
 julia> x,lab,gt = simulate_polygenictrait(rng, # 'rng' can be omitted
            net, 2, 1, # 2 reps, 1 locus only
-           root_prior, transition_distribution);
+           root_distribution, transition_distribution);
 
 julia> using DataFrames
 
@@ -73,7 +75,7 @@ julia> DataFrame(species=lab, rep1=x[1][:], rep2=x[2][:])
 The next example uses a binary 0/1 trait at each locus, and a Markov transition
 for each locus (again, along its own gene tree).
 ```jldoctest polytrait
-julia> root_prior = Binomial(1, 0.3); # has minor allele? minor frequency 0.3
+julia> root_distribution = Binomial(1, 0.3); # has minor allele? minor frequency 0.3
 
 julia> function transition_distribution(x,t)
            prob_nochange = exp(-0.1*t) # substitution rate: 0.1 / coalescent unit
@@ -84,7 +86,7 @@ julia> function transition_distribution(x,t)
 
 julia> x,lab,gt = simulate_polygenictrait(rng, # rng for reproducibility only
           net, 1, 5, # 1 replicate, 5 loci: trait = (# minor alleles) / sqrt(5)
-          root_prior, transition_distribution);
+          root_distribution, transition_distribution);
 
 julia> hcat(lab, x[1])
 3×2 Matrix{Any}:
@@ -98,17 +100,18 @@ julia> writenewick(gt[1], round=true) # gene tree for locus 1
 
 This first example can be made multivariate, here with dimension 3.
 ```jldoctest polytrait
-julia> using LinearAlgebra; # for matrices
+julia> using LinearAlgebra; # for matrices, e.g. I = identity matrix
 
-julia> P = [5.0  0.0  0.5; 0.0  10.0  3.2; 0.5  3.2  7.0]; # symmetric
+julia> root_precision = [5 0 0.5; 0 10 3.2; 0.5 3.2 7]; # symmetric
 
-julia> root_prior = MvNormalCanon([0,0,0], P); # μ=[0,0,0], Σ=P⁻¹
+julia> # distribution at the root: mean μ=[0,0,0], variance Σ = root_precision⁻¹
+       root_distribution = MvNormalCanon([0,0,0], root_precision);
 
 julia> transition_distribution_mv(x,t) = MvNormal(x, 0.1*sqrt(t).*I);
 
 julia> x,lab,gt = simulate_polygenictrait(rng, # 'rng' can be omitted
            net, 1, 4, # 1 reps, 4 loci
-           root_prior, transition_distribution_mv,
+           root_distribution, transition_distribution_mv,
            nindividuals = Dict("A"=>1, "B"=>2, "O"=>1)); # 2 individuals in B
 
 julia> DataFrame(species=lab, dim1=x[1][:,1], dim2=x[1][:,2], dim3=x[1][:,3])
@@ -251,7 +254,7 @@ function simulate_locuseffect_at!(
         node.fvalue = nodeY
     end
     node.booln5 = true
-    if node.leaf
+    if node.leaf # edge case: if the root is also a labeled 'tip'
         Y[lab2index[node.name],:] .= nodeY # broadcast if univariate
     else
         simulate_locuseffect_below!(rng, Y, lab2index, node,

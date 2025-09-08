@@ -26,7 +26,7 @@ For a given gene tree and locus, this process is as follows:
   branch, and `t` the length of the branch, in coalescent units.
 
 The function takes as input a phylogenetic network,
-and simulates the gene trees for each locus using [`simulatecoalescent`](@ref).
+and simulates the gene tree for each locus using [`simulatecoalescent`](@ref).
 
 The documentation for [`simulate_polygenictrait`](@ref) shows two
 examples.
@@ -106,7 +106,7 @@ Note that the mutation rate `μ*len` on each branch
 is scaled by the length of the branch.
 
 Finally, we simulate 2 replicates of the process, using L=4 loci,
-and 2 individuals in each population at the tip:
+and 2 individuals in each population at the tips:
 
 ```@repl polygenictrait
 x,lab,gt = simulate_polygenictrait(net, 2, 4, rootdist, transition;
@@ -123,7 +123,7 @@ DataFrame(individual=lab, population=pop, rep1=x[1][:], rep2=x[2][:])
 ```
 
 The simulated gene trees are also returned for possible downstream use.
-The L=4 gene trees from the first replicated is then listed first,
+The L=4 gene trees from the first replicate are listed first,
 the L trees used for the second replicate listed next, etc.
 ```@repl polygenictrait
 length(gt) # 8 gene trees: 4 for replicate 1, then 4 for replicate 2
