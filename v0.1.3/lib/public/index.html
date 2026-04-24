@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>public · PhyloCoalSimulations.jl</title><meta name="title" content="public · PhyloCoalSimulations.jl"/><meta property="og:title" content="public · PhyloCoalSimulations.jl"/><meta property="twitter:title" content="public · PhyloCoalSimulations.jl"/><meta name="description" content="Documentation for PhyloCoalSimulations.jl."/><meta property="og:description" content="Documentation for PhyloCoalSimulations.jl."/><meta property="twitter:description" content="Documentation for PhyloCoalSimulations.jl."/><meta property="og:url" content="https://cecileane.github.io/PhyloCoalSimulations.jl/stable/lib/public/"/><meta property="twitter:url" content="https://cecileane.github.io/PhyloCoalSimulations.jl/stable/lib/public/"/><link rel="canonical" href="https://cecileane.github.io/PhyloCoalSimulations.jl/stable/lib/public/"/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">PhyloCoalSimulations.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">home</a></li><li><span class="tocitem">manual</span><ul><li><a class="tocitem" href="../../man/getting_started/">getting started</a></li><li><a class="tocitem" href="../../man/mapping_genetree_to_network/">mapping gene trees into the species network</a></li><li><a class="tocitem" href="../../man/converting_coal2generation_units/">converting between units</a></li><li><a class="tocitem" href="../../man/correlated_inheritance/">correlated inheritance</a></li><li><a class="tocitem" href="../../man/more_examples/">more examples</a></li></ul></li><li><span class="tocitem">library</span><ul><li class="is-active"><a class="tocitem" href>public</a><ul class="internal"><li><a class="tocitem" href="#functions-and-types"><span>functions &amp; types</span></a></li><li><a class="tocitem" href="#index"><span>index</span></a></li></ul></li><li><a class="tocitem" href="../internal/">internals</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">library</a></li><li class="is-active"><a href>public</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>public</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/cecileane/PhyloCoalSimulations.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/cecileane/PhyloCoalSimulations.jl/blob/main/docs/src/lib/public.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="public-documentation"><a class="docs-heading-anchor" href="#public-documentation">public documentation</a><a id="public-documentation-1"></a><a class="docs-heading-anchor-permalink" href="#public-documentation" title="Permalink"></a></h1><p>Documentation for <code>PhyloCoalSimulations</code>&#39;s public (exported) functions. Most functions are internal (not exported).</p><h2 id="functions-and-types"><a class="docs-heading-anchor" href="#functions-and-types">functions &amp; types</a><a id="functions-and-types-1"></a><a class="docs-heading-anchor-permalink" href="#functions-and-types" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PhyloCoalSimulations.simulatecoalescent-Tuple{PhyloNetworks.HybridNetwork, Vararg{Any}}" href="#PhyloCoalSimulations.simulatecoalescent-Tuple{PhyloNetworks.HybridNetwork, Vararg{Any}}"><code>PhyloCoalSimulations.simulatecoalescent</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">simulatecoalescent([rng::AbstractRNG,] net, nloci, nindividuals;
+    nodemapping=false, inheritancecorrelation=0.0)</code></pre><p>Simulate <code>nloci</code> gene trees with <code>nindividuals</code> from each species under the multispecies network coalescent, along network <code>net</code> whose branch lengths are assumed to be in <strong>coalescent units</strong> (ratio: number of generations / effective population size). The coalescent model uses the infinite-population-size approximation.</p><p>The random number generator <code>rng</code> is optional.</p><p>Output: vector of gene trees, of length <code>nloci</code>.</p><p><code>nindividuals</code> can be a single integer, or a dictionary listing the number of individuals to be simulated for each species.</p><p>If <code>nodemapping</code> is true, each simulated gene tree is augmented with degree-2 nodes that can be mapped to speciation or hybridization events. The mapping of gene tree nodes &amp; edges to network edges is carried by the <code>.inCycle</code> attribute. The mapping of gene tree nodes to network nodes is carried by the <code>.name</code> attribute. Namely:</p><ul><li>A degree-3 node (1 parent + 2 children) represents a coalescent event that occurred along a population <em>edge</em> in <code>net</code>. Its <code>.inCycle</code> attribute is set to the number of that network population edge. Its parent edge has its <code>.inCycle</code> attribute also set to the number of the population edge that it originated from.</li><li>The gene tree&#39;s root node (of degree 2) represents a coalescent event along the network&#39;s root edge. Its <code>.inCycle</code> attribute is the number assigned to the network&#39;s root edge, which is set by <a href="../internal/#PhyloCoalSimulations.get_rootedgenumber-Tuple{Any}"><code>get_rootedgenumber</code></a> as the maximum edge number + 1.</li><li>A leaf (or degree-1 node) represents an individual. It maps to a species in <code>net</code>. The individual leaf name is set to the species name if <code>nindividuals</code> is 1. Otherwise, its name is set to <code>speciesname_i</code> where <code>i</code> is the individual number in that species. Its <code>inCycle</code> attribute is the default <code>-1</code>.</li><li>A non-root degree-2 node represents a speciation or hybridization and maps to a population <em>node</em> in <code>net</code>. Its <code>inCycle</code> attribute is the default <code>-1</code>. Its name is set to network node name, if it exists. If the network node has no name, the gene tree node is given a name built from the network node number.</li></ul><p>By default, lineages at a hybrid node come from a parent (chosen according to inheritance probabilities γ) <em>independently</em> across lineages. Positive dependence can be simulated with option <code>inheritancecorrelation</code>. For example, if this correlation is set to 1, then all lineages inherit from the same (randomly sampled) parent. More generally, the lineages&#39; parents are simulated according to a Dirichlet process with base distribution determined by the γ values, and with concentration parameter α = (1-r)/r, that is, r = 1/(1+α), where <code>r</code> is the input inheritance correlation. For more details about this model, please read the package manual or refer to <a href="https://doi.org/10.1093/sysbio/syad030">Fogg, Allman &amp; Ané (2023)</a>.</p><p>Assumptions:</p><ul><li><code>net</code> must have non-missing edge lengths and γ values.</li><li>If <code>nindividuals</code> is a dictionary, it must have a key for all species, with the same spelling of species names in its keys as in the tip labels of <code>net</code>.</li></ul><p><strong>examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PhyloNetworks
+
+julia&gt; net = readTopology(&quot;(A:1,B:1);&quot;); # branch lengths of 1 coalescent unit
+
+julia&gt; using Random; Random.seed!(54321); # for replicability of examples below
+
+julia&gt; simulatecoalescent(net, 2, 1) # 2 gene trees, 1 individual/species
+2-element Vector{HybridNetwork}:
+ PhyloNetworks.HybridNetwork, Rooted Network
+2 edges
+3 nodes: 2 tips, 0 hybrid nodes, 1 internal tree nodes.
+tip labels: B, A
+(B:1.023,A:1.023);
+
+ PhyloNetworks.HybridNetwork, Rooted Network
+2 edges
+3 nodes: 2 tips, 0 hybrid nodes, 1 internal tree nodes.
+tip labels: B, A
+(B:2.328,A:2.328);
+
+
+julia&gt; simulatecoalescent(net, 1, 3)[1] # 1 gene tree, 3 individuals/species
+PhyloNetworks.HybridNetwork, Rooted Network
+10 edges
+11 nodes: 6 tips, 0 hybrid nodes, 5 internal tree nodes.
+tip labels: B_2, B_1, B_3, A_3, ...
+(((B_2:0.12,B_1:0.12):2.39,B_3:2.51):0.692,(A_3:0.518,(A_2:0.461,A_1:0.461):0.057):2.684);
+
+
+julia&gt; simulatecoalescent(net, 1, Dict(&quot;A&quot;=&gt;2, &quot;B&quot;=&gt;1))[1] # 2 individuals in A, 1 in B
+PhyloNetworks.HybridNetwork, Rooted Network
+4 edges
+5 nodes: 3 tips, 0 hybrid nodes, 2 internal tree nodes.
+tip labels: B, A_2, A_1
+(B:2.801,(A_2:0.344,A_1:0.344):2.457);</code></pre><p>In the next example, we use a custom random number generator (RNG), to show how to do so. In this example we use a stable RNG to make the example reproducible across julia versions. However, this particular RNG is <em>not</em> recommended. The RNG used by default is better (e.g. much more efficient).</p><pre><code class="language-julia-repl hljs">julia&gt; # using Pkg; Pkg.add(&quot;StableRNGs&quot;) # to install StableRNGs if not done earlier
+
+julia&gt; using StableRNGs
+
+julia&gt; rng = StableRNG(791);
+
+julia&gt; tree1 = simulatecoalescent(rng, net,2,2; nodemapping=true)[1]; # first gene tree only
+
+julia&gt; writeTopology(tree1, round=true)
+&quot;(((B_2:0.82,B_1:0.82):0.18)minus2:0.992,((A_1:1.0)minus2:0.427,(A_2:1.0)minus2:0.427):0.565);&quot;
+
+julia&gt; PhyloNetworks.nameinternalnodes!(net, &quot;i&quot;); writeTopology(net)
+&quot;(A:1.0,B:1.0)i1;&quot;
+
+julia&gt; tree1 = simulatecoalescent(rng, net,2,2; nodemapping=true)[1]; writeTopology(tree1, round=true)
+&quot;((B_2:1.0)i1:0.621,((B_1:1.0)i1:0.018,((A_1:0.61,A_2:0.61):0.39)i1:0.018):0.604);&quot;
+
+julia&gt; printNodes(net)
+node leaf  hybrid hasHybEdge name inCycle edges&#39;numbers
+1    true  false  false      A    -1      1   
+2    true  false  false      B    -1      2   
+-2   false false  false      i1   -1      1    2   
+
+julia&gt; printNodes(tree1)
+node leaf  hybrid hasHybEdge name inCycle edges&#39;numbers
+10   false false  false           3       8    9   
+8    false false  false      i1   -1      5    8   
+5    true  false  false      B_2  -1      5   
+9    false false  false           3       7    6    9   
+7    false false  false      i1   -1      4    7   
+4    true  false  false      B_1  -1      4   
+6    false false  false      i1   -1      3    6   
+3    false false  false           1       1    2    3   
+1    true  false  false      A_1  -1      1   
+2    true  false  false      A_2  -1      2   
+
+julia&gt; [(tree_edge_number = e.number, pop_edge_number = e.inCycle) for e in tree1.edge]
+9-element Vector{@NamedTuple{tree_edge_number::Int64, pop_edge_number::Int64}}:
+ (tree_edge_number = 8, pop_edge_number = 3)
+ (tree_edge_number = 5, pop_edge_number = 2)
+ (tree_edge_number = 9, pop_edge_number = 3)
+ (tree_edge_number = 7, pop_edge_number = 3)
+ (tree_edge_number = 4, pop_edge_number = 2)
+ (tree_edge_number = 6, pop_edge_number = 3)
+ (tree_edge_number = 3, pop_edge_number = 1)
+ (tree_edge_number = 1, pop_edge_number = 1)
+ (tree_edge_number = 2, pop_edge_number = 1)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/cecileane/PhyloCoalSimulations.jl/blob/013881e3c5a29ccc52b92013801da0ad0f435276/src/simulatecoalescent_network.jl#L9-L162">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PhyloCoalSimulations.simulatecoalescent-Tuple{Random.AbstractRNG, PhyloNetworks.HybridNetwork, Integer, Any, Any}" href="#PhyloCoalSimulations.simulatecoalescent-Tuple{Random.AbstractRNG, PhyloNetworks.HybridNetwork, Integer, Any, Any}"><code>PhyloCoalSimulations.simulatecoalescent</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">simulatecoalescent([rng::AbstractRNG,] net, nloci, nindividuals, populationsize;
+    nodemapping=false, round_generationnumber=true,
+    inheritancecorrelation=0.0)</code></pre><p>Simulate <code>nloci</code> gene trees with <code>nindividuals</code> from each species under the multispecies network coalescent, along network <code>net</code>, whose branch lengths are assumed to be in <strong>number of generations</strong>. <code>populationsize</code> should be a single number, assumed to be the (haploid) effective population size Nₑ, constant across the species phylogeny. Alternatively, <code>populationsize</code> can be a dictionary mapping the number of each edge in <code>net</code> to its Nₑ, including an extra edge number for the population above the root of the network.</p><p>Coalescent units are then calculated as <code>u=g/Nₑ</code> where <code>g</code> is the edge length in <code>net</code> (number of generations), and the coalescent model is applied using the infinite-population-size approximation.</p><p>Output: vector of gene trees with edge lengths in number of generations, calculated as <code>g=uNₑ</code> and then rounded to be an integer, unless <code>round_generationnumber</code> is false.</p><div class="admonition is-warning"><header class="admonition-header">Warning</header><div class="admonition-body"><p>When <code>populationsize</code> Nₑ is not provided as input, all edge lengths are in coalescent units. When <code>populationsize</code> is given as an argument, all edge lengths are in number of generations. The second method (using # generation and Nₑ as input) is a wrapper around the first (using coalescent units).</p></div></div><pre><code class="language-julia-repl hljs">julia&gt; using PhyloNetworks
+
+julia&gt; net = readTopology(&quot;(A:500,B:500);&quot;); # branch lengths of 100 generations
+
+julia&gt; Ne = Dict(e.number =&gt; 1_000 for e in net.edge);
+
+julia&gt; rootedgenumber = PhyloCoalSimulations.get_rootedgenumber(net)
+3
+
+julia&gt; push!(Ne, rootedgenumber =&gt; 2_000) # Ne for population above the root
+Dict{Int64, Int64} with 3 entries:
+  2 =&gt; 1000
+  3 =&gt; 2000
+  1 =&gt; 1000
+
+julia&gt; using Random; Random.seed!(54321); # for replicability of example below
+
+julia&gt; genetrees = simulatecoalescent(net, 2, 1, Ne);
+
+julia&gt; writeMultiTopology(genetrees, stdout) # branch lengths: number of generations
+(B:546.0,A:546.0);
+(B:3155.0,A:3155.0);
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/cecileane/PhyloCoalSimulations.jl/blob/013881e3c5a29ccc52b92013801da0ad0f435276/src/simulatecoalescent_network.jl#L295-L349">source</a></section></article><h2 id="index"><a class="docs-heading-anchor" href="#index">index</a><a id="index-1"></a><a class="docs-heading-anchor-permalink" href="#index" title="Permalink"></a></h2><ul><li><a href="#PhyloCoalSimulations.simulatecoalescent-Tuple{PhyloNetworks.HybridNetwork, Vararg{Any}}"><code>PhyloCoalSimulations.simulatecoalescent</code></a></li><li><a href="#PhyloCoalSimulations.simulatecoalescent-Tuple{Random.AbstractRNG, PhyloNetworks.HybridNetwork, Integer, Any, Any}"><code>PhyloCoalSimulations.simulatecoalescent</code></a></li></ul></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../man/more_examples/">« more examples</a><a class="docs-footer-nextpage" href="../internal/">internals »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Friday 17 May 2024 13:35">Friday 17 May 2024</span>. Using Julia version 1.10.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
