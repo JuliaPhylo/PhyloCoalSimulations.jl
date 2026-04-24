@@ -22,13 +22,16 @@ jobs:
           - '1' # will expand to the latest stable 1.x release of Julia.
         os:
           - ubuntu-latest
-          - macOS-latest
           - windows-latest
         arch:
           - x64
+        include:
+          - version: '1'
+            os: macos-latest
+            arch: aarch64
     steps:
       - uses: actions/checkout@v6
-      - uses: julia-actions/setup-julia@v2
+      - uses: julia-actions/setup-julia@v3
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
